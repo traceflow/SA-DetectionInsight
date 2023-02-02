@@ -1,0 +1,77 @@
+#tableDetails tr.odd > td.yes-cell {
+    background-color: #1E6F52 !important;
+}
+
+#tableDetails tr.even > td.yes-cell {
+    background-color: #1E6F52 !important;
+}
+
+#tableDetails tr.odd > td.no-cell {
+    background-color: #65778A !important;
+}
+
+#tableDetails tr.even > td.no-cell {
+    background-color: #65778A !important;
+}
+
+#tableDetails tr.odd > td {
+    background-color: #2b3033 !important;
+}
+
+#tableDetails tr.even > td {
+    background-color: #171d21 !important;
+}
+
+#tableDetectionChecks td.details-cell {
+    border-left: 5px solid #20689C;
+}
+
+#tableDetectionExpandedDetails tr.odd > td.yes-cell {
+    background-color: #1E6F52 !important;
+}
+
+#tableDetectionExpandedDetails tr.even > td.yes-cell {
+    background-color: #1E6F52 !important;
+}
+
+#tableDetectionExpandedDetails tr.odd > td.no-cell {
+    background-color: #65778A !important;
+}
+
+#tableDetectionExpandedDetails tr.even > td.no-cell {
+    background-color: #65778A !important;
+}
+
+#tableDetectionExpandedDetails tr.odd > td {
+    background-color: #2b3033 !important;
+}
+
+#tableDetectionExpandedDetails tr.even > td {
+    background-color: #171d21 !important;
+}
+
+#tableDetectionDetails td.details-cell {
+    border-left: 5px solid #20689C;
+}
+
+td.data-bar-cell {
+    padding: 4px 8px;
+}
+
+td.data-bar-cell .data-bar-wrapper {
+    border: solid 1px black;
+    background-color: #3C444D;
+}
+
+td.data-bar-cell .data-bar-wrapper .data-bar {
+    height: 20px;
+    background: linear-gradient(to bottom, #a7cfdf 1%,#23538a 37%);
+    min-width: 1px;
+    background-color: #294165;
+    padding-left: 5px;
+}
+
+#dendrogramViz {
+    border: 1px solid #65778a;
+    background-color: #2b3033;
+}

@@ -1,0 +1,639 @@
+<form script="prism_setup.js,prism.js,tabs.js,detection_insight.js" stylesheet="prism.css,tabs.css,detection_insight.css" version="1.1" theme="dark">
+  <label>Security Detections Insights</label>
+  <description>Provides insight into the security detections (Correlation Rules) in your Splunk Enterprise Security environment.</description>
+  <!-- Modal -->
+  <search id="baseDetectionsSearch">
+    <query>
+      | rest splunk_server=local count=0 /services/saved/searches 
+    </query>
+  </search>
+  <search id="baseSplunkInstanceType">
+    <query>
+      | rest splunk_server=local count=1 /services/server/info 
+      | fields instance_type
+      | eval instance_type=coalesce(instance_type, "on-premises")
+    </query>
+  </search>
+  <fieldset submitButton="false" autoRun="true"></fieldset>
+  <row id="tabs">
+    <panel>
+      <html>
+        <style>
+          .dashboard-row .dashboard-panel .panel-head h3 {
+             border: 1px dashed #20689C;
+             border-left: 6px solid #20689C;
+             font-weight: normal;
+          }
+        </style>
+        <ul id="tabs" class="nav nav-tabs">
+          <li class="active">
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_overview_header,tab_overview,tab_overview_2,tab_overview_3" data-token="tab_overview_token">Overview</a>
+          </li>
+          <li>
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_detections,tab_detections_2" data-token="tab_detections_token">Detection Details</a>
+          </li>
+          <li>
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_mitre,tab_mitre_2,tab_mitre_3" data-token="tab_mitre_token">MITRE Att&amp;ck Details</a>
+          </li>
+          <li>
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_scheduling,tab_scheduling_2,tab_scheduling_3,tab_scheduling_4" data-token="tab_scheduling_token">Scheduling Details</a>
+          </li>
+        </ul>
+      </html>
+    </panel>
+  </row>
+  <row id="tab_overview_header">
+    <panel>
+      <html>
+        <h2>Detections Overview</h2>
+      </html>
+    </panel>
+  </row>
+  <row id="tab_overview">
+    <panel>
+      <title>Enabled</title>
+      <viz type="status_indicator_app.status_indicator">
+        <search base="baseDetectionsSearch">
+          <query>
+$tab_overview_token$
+| where isnotnull('action.correlationsearch.enabled') AND disabled = 0
+| stats count
+| eval icon = ""
+          </query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="status_indicator_app.status_indicator.colorBy">static_color</option>
+        <option name="status_indicator_app.status_indicator.fillTarget">text</option>
+        <option name="status_indicator_app.status_indicator.fixIcon">check</option>
+        <option name="status_indicator_app.status_indicator.icon">fix_icon</option>
+        <option name="status_indicator_app.status_indicator.precision">0</option>
+        <option name="status_indicator_app.status_indicator.showOption">1</option>
+        <option name="status_indicator_app.status_indicator.staticColor">#2ea77b</option>
+        <option name="status_indicator_app.status_indicator.useColors">true</option>
+        <option name="status_indicator_app.status_indicator.useThousandSeparator">true</option>
+      </viz>
+    </panel>
+    <panel>
+      <title>Total Available</title>
+      <viz type="status_indicator_app.status_indicator">
+        <search base="baseDetectionsSearch">
+          <query>$tab_overview_token$
+| where isnotnull('action.correlationsearch.enabled')
+| stats count
+| eval icon = ""</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="status_indicator_app.status_indicator.colorBy">static_color</option>
+        <option name="status_indicator_app.status_indicator.fillTarget">text</option>
+        <option name="status_indicator_app.status_indicator.fixIcon">search</option>
+        <option name="status_indicator_app.status_indicator.icon">fix_icon</option>
+        <option name="status_indicator_app.status_indicator.precision">0</option>
+        <option name="status_indicator_app.status_indicator.showOption">1</option>
+        <option name="status_indicator_app.status_indicator.staticColor">#abbfdc</option>
+        <option name="status_indicator_app.status_indicator.useColors">true</option>
+        <option name="status_indicator_app.status_indicator.useThousandSeparator">true</option>
+      </viz>
+    </panel>
+  </row>
+  <row id="tab_overview_2">
+    <panel>
+      <title>Detections Details</title>
+      <input type="dropdown" token="tokStatusOverview" searchWhenChanged="true">
+        <label>Status</label>
+        <choice value="*">All</choice>
+        <choice value="0">Enabled Only</choice>
+        <choice value="1">Disabled Only</choice>
+        <default>0</default>
+        <initialValue>0</initialValue>
+      </input>
+      <input type="multiselect" token="tokDomainOverview" searchWhenChanged="true">
+        <label>Security Domain</label>
+        <choice value="*">All</choice>
+        <choice value="NONE">Unset</choice>
+        <choice value="access">Access</choice>
+        <choice value="audit">Audit</choice>
+        <choice value="endpoint">Endpoint</choice>
+        <choice value="identity">Identity</choice>
+        <choice value="network">Network</choice>
+        <choice value="threat">Threat</choice>
+        <default>*</default>
+        <prefix>(</prefix>
+        <suffix>)</suffix>
+        <initialValue>*</initialValue>
+        <valuePrefix>action.notable.param.security_domain="</valuePrefix>
+        <valueSuffix>"</valueSuffix>
+        <delimiter> OR </delimiter>
+      </input>
+      <table id="tableDetectionChecks">
+        <title>Note: Expand a particular check row to get more details.</title>
+        <search base="baseDetectionsSearch">
+          <query>$tab_overview_token$
+| where isnotnull('action.correlationsearch.enabled')
+| fillnull value="NONE" action.notable.param.security_domain
+| search disabled=$tokStatusOverview$ $tokDomainOverview$
+| stats count as Total count(eval(isnotnull('action.notable.param.drilldown_search'))) as "Detection has a Contributing Event Search" count(eval(match('actions',"notable"))) as "Detection generates Notable Events" count(eval(match('actions',"risk"))) as "Detection generates Risk" count(eval(match('actions',"trustar_submit_event"))) as "Detection uses Threat Intelligence Management Action" count(eval(match('action.correlationsearch.annotations',"mitre_attack"))) as "Detection is mapped to MITRE Att&amp;ck" count(eval(match('action.correlationsearch.annotations',"cis20"))) as "Detection is mapped to CIS20" count(eval(match('action.correlationsearch.annotations',"nist"))) as "Detection is mapped to NIST" count(eval(match('action.correlationsearch.annotations',"kill_chain_phases"))) as "Detection is mapped to KillChain"
+| foreach *
+  [ eval "&lt;&lt;FIELD&gt;&gt;" = '&lt;&lt;FIELD&gt;&gt;' + "/" + Total ]
+| fields - Total*
+| transpose
+| rename column as Check "row 1" as Results
+| eval Percent = round(tonumber(mvindex(split(Results,"/"),0)) / tonumber(mvindex(split(Results,"/"),1)) * 100, 2)</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row id="tab_overview_3">
+    <panel>
+      <title>Detections by Status, Security Domain &amp; Data Model</title>
+      <viz type="sunburst_viz.sunburst_viz">
+        <search base="baseDetectionsSearch">
+          <query>$tab_overview_token$
+| where isnotnull('action.correlationsearch.enabled')
+| search disabled=$tokStatusOverview$
+| eval status=if(disabled == 0, "Enabled", "Disabled")
+| eval domain = coalesce(lower('action.notable.param.security_domain'), "&lt;none&gt;") 
+| eval base_search=if(match(search,"^\|"),trim(mvindex(split(search,"|"),1)),trim(mvindex(split(search,"|"),0))) 
+| rex field=base_search "^\`(?&lt;base_search_macro_name&gt;\S+)\`\s" 
+| join type=left base_search_macro_name 
+    [| rest splunk_server=local /services/data/macros 
+    | table title definition 
+    | rename title AS base_search_macro_name, definition AS base_search_macro_details] 
+| rex field=base_search "datamodel\s?(=|:)\s?\"?(?&lt;base_search_dm&gt;[^\s\"]+)\"?"
+| rex field=base_search_macro_details "datamodel\s?(=|:)\s?(?&lt;base_search_dm_macro&gt;[^\s]+)" 
+| eval dm_name=coalesce(base_search_dm,base_search_dm_macro) 
+| table title dm_name base_search status domain
+| eval dm_name=coalesce(mvindex(split(dm_name,"."),0), "&lt;none&gt;")
+| stats count by status domain dm_name</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="height">1000</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="sunburst_viz.sunburst_viz.breadcrumbs">hide</option>
+        <option name="sunburst_viz.sunburst_viz.color">interpolateCubehelixDefault</option>
+        <option name="sunburst_viz.sunburst_viz.colormode">parent</option>
+        <option name="sunburst_viz.sunburst_viz.labelcolor">#ffffff</option>
+        <option name="sunburst_viz.sunburst_viz.labels">show</option>
+        <option name="sunburst_viz.sunburst_viz.labelsize">90</option>
+        <option name="sunburst_viz.sunburst_viz.labelwidth">150</option>
+        <option name="sunburst_viz.sunburst_viz.maxrows">1500</option>
+        <option name="sunburst_viz.sunburst_viz.mode">static</option>
+      </viz>
+    </panel>
+  </row>
+  <row id="tab_detections">
+    <panel>
+      <title>Security Detections</title>
+      <input type="dropdown" token="tokStatus" searchWhenChanged="true">
+        <label>Status</label>
+        <choice value="1=1">All</choice>
+        <choice value="isEnabled=&quot;True&quot;">Enabled Only</choice>
+        <choice value="isEnabled=&quot;False&quot;">Disabled Only</choice>
+        <default>isEnabled="True"</default>
+        <initialValue>isEnabled="True"</initialValue>
+      </input>
+      <input type="dropdown" token="tokTrigger" searchWhenChanged="true">
+        <label>Trigger Status</label>
+        <choice value="1=1">ALL</choice>
+        <choice value="'Triggering Trend' != &quot;&lt;Did not trigger&gt;&quot;">Triggered Only</choice>
+        <choice value="'Triggering Trend' = &quot;&lt;Did not trigger&gt;&quot;">Not Triggered Only</choice>
+        <default>1=1</default>
+        <initialValue>1=1</initialValue>
+      </input>
+      <input type="multiselect" token="tokDomain" searchWhenChanged="true">
+        <label>Security Domain</label>
+        <choice value="*">ALL</choice>
+        <choice value="access">Access</choice>
+        <choice value="audit">Audit</choice>
+        <choice value="endpoint">Endpoint</choice>
+        <choice value="identity">Identity</choice>
+        <choice value="network">Network</choice>
+        <choice value="threat">Threat</choice>
+        <default>*</default>
+        <prefix>(</prefix>
+        <suffix>)</suffix>
+        <initialValue>*</initialValue>
+        <valuePrefix>action.notable.param.security_domain="</valuePrefix>
+        <valueSuffix>"</valueSuffix>
+        <delimiter> OR </delimiter>
+      </input>
+      <input type="multiselect" token="tokMainCommand" searchWhenChanged="true">
+        <label>Main SPL Command</label>
+        <choice value="*">ALL</choice>
+        <choice value="raw data search">search</choice>
+        <choice value="tstats">tstats</choice>
+        <choice value="lookup">lookup</choice>
+        <choice value="datamodel">datamodel</choice>
+        <choice value="macro">macro</choice>
+        <choice value="macro (raw data search)">macro (raw data search)</choice>
+        <choice value="rest">rest</choice>
+        <choice value="other">other</choice>
+        <default>*</default>
+        <prefix>(</prefix>
+        <suffix>)</suffix>
+        <initialValue>*</initialValue>
+        <valuePrefix>command_type="</valuePrefix>
+        <valueSuffix>"</valueSuffix>
+        <delimiter> OR </delimiter>
+      </input>
+      <input type="multiselect" token="tokActions" searchWhenChanged="true">
+        <label>Action Used</label>
+        <fieldForLabel>label</fieldForLabel>
+        <fieldForValue>value</fieldForValue>
+        <search base="baseDetectionsSearch">
+          <query>| eval isEnabled=if(disabled == 0, "True", "False") 
+| where isnotnull('action.correlationsearch.enabled') AND $tokStatus$
+| eval actions = split(actions, ", ")
+| mvexpand actions 
+| stats count by actions 
+| join type=outer actions 
+    [| rest splunk_server=local count=0 /services/configs/conf-alert_actions 
+    | table title, label 
+    | rename title as actions
+        ] 
+| eval label = if(actions == "" OR isnull(actions), "No action used", coalesce(label, actions)) + " (" + count + ")" 
+| rename actions as value</query>
+        </search>
+        <choice value="*">ALL</choice>
+        <default>*</default>
+        <prefix>(</prefix>
+        <suffix>)</suffix>
+        <initialValue>*</initialValue>
+        <valuePrefix>actions="*</valuePrefix>
+        <delimiter> OR </delimiter>
+        <valueSuffix>*"</valueSuffix>
+      </input>
+      <input type="multiselect" token="tokTechniques" searchWhenChanged="true">
+        <label>ATT&amp;CK Technique(s)</label>
+        <choice value="*">ALL</choice>
+        <default>*</default>
+        <initialValue>*</initialValue>
+        <fieldForLabel>label</fieldForLabel>
+        <fieldForValue>mitre_id</fieldForValue>
+        <search>
+          <query>| inputlookup mitre_enrichment.csv
+| eval label = mitre_id + " - " + technique
+| stats count by label, mitre_id</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+        </search>
+        <prefix>(</prefix>
+        <suffix>)</suffix>
+        <valuePrefix>Technique="</valuePrefix>
+        <valueSuffix>"</valueSuffix>
+        <delimiter>  OR </delimiter>
+      </input>
+      <table id="tableDetectionDetails">
+        <title>Note: Expand any of the detections for more information.</title>
+        <search base="baseDetectionsSearch">
+          <query>$tab_detections_token$
+| eval isEnabled=if(disabled == 0, "True", "False") 
+| where isnotnull('action.correlationsearch.enabled') AND $tokStatus$
+| fillnull value="&lt;none&gt;" action.notable.param.security_domain 
+| spath input=action.correlationsearch.annotations 
+| rename mitre_attack{} as Technique
+| fillnull value="" Technique
+| search $tokTechniques$ $tokActions$
+| rex field=search "^\s*(\||\()\s*\`(?&lt;macro_name&gt;.*?)\`"
+| eval arg_count = if(match(macro_name, "^.*\([\d,]+\)$"), mvcount(split(macro_name, ",")), null())
+| eval macro_name_normalized = if(isnotnull(arg_count), mvindex(split(macro_name, "("), 0) + "(" + arg_count + ")", macro_name)
+| join type=left macro_name_normalized 
+    [| rest splunk_server=local /services/data/macros 
+    | table title definition 
+    | rename title AS macro_name_normalized] 
+| eval expanded_search = if(isnotnull(definition), replace(search, "\`" + macro_name + "\`", definition), search)
+| eval command_type = case(match(expanded_search, "(?i)^\s*\|\s*from datamodel"), "datamodel", match(expanded_search, "(?i)^\s*\|\s*tstats"), "tstats", match(expanded_search, "(?i)^\s*\|\s*(from |)inputlookup"), "lookup", isnotnull(definition) AND match(expanded_search, "(?i)(eventtype\s*=\s*|source\s*=\s*|sourcetype\s*=\s*|index\s*=\s*).*?\|"), "macro (raw data search)", match(expanded_search, "^\s*(\||)\s*\`"), "macro", match(expanded_search, "(?i)^\s*\|\s*rest"), "rest", match(expanded_search, "(?i)(eventtype\s*=\s*|source\s*=\s*|sourcetype\s*=\s*|index\s*=\s*|tag\s*=\s*|tag\s+in\s+).*?\|"), "raw data search", true(), "other")
+| eval "Provided By" = if('eai:acl.app'=="DA-ESS-ContentUpdate", "ESCU", "ES") 
+| rename id as _id, eai:acl.app as Application, title as Name, action.notable.param.security_domain as Domain, actions as "Adaptive Response Actions", isEnabled as "Enabled?"
+| eval Domain = lower(Domain) 
+| join Name type=outer 
+    [ search index=notable OR index=risk earliest=-24h latest=now
+    | stats sparkline as "Triggering Trend" by source 
+    | rename source as Name] 
+| fillnull value="&lt;Did not trigger&gt;" "Triggering Trend"
+| where $tokTrigger$
+| search $tokMainCommand$
+| makemv delim="," "Triggering Trend" 
+| rename command_type as "Main SPL Command"
+| table , Name, "Triggering Trend", "Enabled?", "Provided By", Application, Domain, "Main SPL Command", "Adaptive Response Actions", Technique</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+        <format type="color" field="Enabled?">
+          <colorPalette type="map">{"True":#1E6F52,"False":#65778A}</colorPalette>
+        </format>
+        <format type="color" field="Provided By">
+          <colorPalette type="map">{"ES":#3C444D,"ESCU":#2EA39B}</colorPalette>
+        </format>
+        <format type="color" field="Domain">
+          <colorPalette type="map">{"access":#ABBFDC,"audit":#A3E5CD,"endpoint":#98F0EF,"identity":#169C9B,"network":#3E6297,"threat":#004153,"&lt;none&gt;":#65778A}</colorPalette>
+        </format>
+        <format field="Triggering Trend" type="sparkline">
+          <option name="lineColor">#1fdad9</option>
+          <option name="fillColor">#169c9b</option>
+          <option name="lineWidth">1</option>
+          <option name="height">35</option>
+        </format>
+      </table>
+    </panel>
+  </row>
+  <row id="tab_detections_2">
+    <panel>
+      <title>Security Detection Changes</title>
+      <input type="time" token="tokChangesTime" searchWhenChanged="true">
+        <label>Time Window</label>
+        <default>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </default>
+      </input>
+      <input type="multiselect" token="tokChangeActions" searchWhenChanged="true">
+        <label>Include</label>
+        <choice value="Enabled">Searches Enabled</choice>
+        <choice value="Disabled">Searches Disabled</choice>
+        <choice value="Modified">Searches Modified</choice>
+        <default>Enabled,Disabled</default>
+        <prefix>(</prefix>
+        <suffix>)</suffix>
+        <initialValue>Enabled,Disabled</initialValue>
+        <valuePrefix>"</valuePrefix>
+        <valueSuffix>"</valueSuffix>
+        <delimiter>, </delimiter>
+      </input>
+      <table>
+        <search>
+          <query>index=_configtracker component=ConfigChange data.path=*savedsearches.conf data.changes{}.properties{}.new_value=* $tab_detections_token$
+| where isnull(mvcount(mvfilter(len('data.changes{}.properties{}.old_value') &gt; 0)))
+| eval Action = case('data.changes{}.properties{}.new_value'="0" AND mvindex('data.changes{}.properties{}.name',0)="disabled", "Enabled", 'data.changes{}.properties{}.new_value'="1" AND mvindex('data.changes{}.properties{}.name',0)="disabled", "Disabled", true(), "Modified")
+| search Action IN $tokChangeActions$
+| rename _time as "Modification Time", data.changes{}.stanza as Title, data.changes{}.properties{}.name as Properties, data.changes{}.properties{}.new_value as Values
+| table "Modification Time", Title, Action, Properties, Values
+| convert ctime("Modification Time")</query>
+          <earliest>$tokChangesTime.earliest$</earliest>
+          <latest>$tokChangesTime.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+        <format type="color" field="Action">
+          <colorPalette type="map">{"Enabled":#1E6F52,"Disabled":#3C444D,"Modified":#CBA700}</colorPalette>
+        </format>
+      </table>
+    </panel>
+  </row>
+  <row id="tab_mitre">
+    <panel>
+      <title>Detections Coverage</title>
+      <input type="dropdown" token="tokStatusMitre" searchWhenChanged="true">
+        <label>Status</label>
+        <choice value="1=1">All</choice>
+        <choice value="disabled=0">Enabled Only</choice>
+        <choice value="disabled=1">Disabled Only</choice>
+        <default>disabled=0</default>
+        <initialValue>disabled=0</initialValue>
+      </input>
+      <viz type="mitre_attck_heatmap.mitre_attck_heatmap" id="mitreHeatmap1">
+        <title>This shows how selected detections map to the MITRE Att&amp;ck Framework based on the technique they are meant to detect.</title>
+        <search base="baseDetectionsSearch">
+          <query>$tab_mitre_token$
+| where $tokStatusMitre$ AND (match('action.correlationsearch', "1|[Tt]|[Tt][Rr][Uu][Ee]") OR match('action.notable', "1|[Tt]|[Tt][Rr][Uu][Ee]")) 
+| spath input=action.correlationsearch.annotations 
+| fields title mitre_attack{} 
+| rename title as Title, mitre_attack{} as Technique 
+| mvexpand Technique 
+| search Technique=* AND Technique!="" 
+| eval Technique = replace(Technique, "([Tt]\d+)(\.\d+|)", "\1") 
+| stats dc(Title) as "# of Detections" values(Title) as Detections by Technique</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.endColor">#ADD8E6</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.endVal">5</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.hideNull">no</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.legendTitle">Enabled Security Detections</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.midColor">#22908D</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.sortOrder">desc</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.startColor">#0C1587</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.theme">dark</option>
+        <option name="refresh.display">progressbar</option>
+      </viz>
+    </panel>
+  </row>
+  <row id="tab_mitre_2">
+    <panel>
+      <title>Triggered Detections Coverage</title>
+      <input type="time" token="tokNotablesTime" searchWhenChanged="true">
+        <label>Time Window</label>
+        <default>
+          <earliest>-7d@h</earliest>
+          <latest>now</latest>
+        </default>
+      </input>
+      <viz type="mitre_attck_heatmap.mitre_attck_heatmap" id="mitreHeatmap2">
+        <title>This shows how triggered detections in your environment map to the MITRE Att&amp;ck Framework based on the technique they are meant to detect.</title>
+        <search>
+          <query>`notable` $tab_mitre_token$ | rename annotations.mitre_attack.mitre_technique_id as Technique
+| search Technique=* AND Technique!="" AND Technique!="None"
+| eval Technique = replace(Technique, "([Tt]\d+)(\.\d+|)", "\1") 
+| stats dc(search_name) as "# of Detections" values(search_name) as Detections by Technique</query>
+          <earliest>$tokNotablesTime.earliest$</earliest>
+          <latest>$tokNotablesTime.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.endColor">#ADD8E6</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.endVal">5</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.hideNull">yes</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.legendTitle">Triggered Security Detections</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.midColor">#22908D</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.sortOrder">desc</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.startColor">#0C1587</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.theme">dark</option>
+        <option name="refresh.display">progressbar</option>
+      </viz>
+    </panel>
+  </row>
+  <row id="tab_mitre_3">
+    <panel>
+      <title>Security Posture Changes</title>
+      <viz type="mitre_attck_heatmap.mitre_attck_heatmap">
+        <title>This shows changes that were made to your security detection that might impact your security posture in the selected time frame.</title>
+        <search>
+          <query>index=_configtracker component=ConfigChange data.action=update data.path=*savedsearches.conf data.changes{}.properties{}.name=disabled $tab_mitre_token$
+| where isnotnull('data.changes{}.properties{}.new_value') AND len(trim('data.changes{}.properties{}.new_value')) &gt; 0 
+| eval action = if('data.changes{}.properties{}.new_value'="0", "enabled", "disabled") 
+| stats latest(action) as action by data.changes{}.stanza 
+| rename data.changes{}.stanza as Title 
+| join Title 
+    [| rest splunk_server=local count=0 /servicesNS/-/SplunkEnterpriseSecuritySuite/saved/searches 
+    | search action.correlationsearch.annotations=* 
+    | spath input=action.correlationsearch.annotations 
+    | fields title mitre_attack{} 
+    | rename title as Title, mitre_attack{} as Technique 
+    | mvexpand Technique 
+    | eval Technique = replace(Technique, "([Tt]\d+)(\.\d+|)", "\1") ]
+| eval count=if(action=="disabled",0,1) 
+| eval Title=if(action=="disabled",Title + " (Removed)",Title + " (Added)") 
+| table Technique count Title</query>
+          <earliest>$tokNotablesTime.earliest$</earliest>
+          <latest>$tokNotablesTime.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.endVal">1</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.hideNull">yes</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.legendTitle">Changes (0 = Disabled, 1 = Activated)</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.midColor">#22908D</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.sortOrder">desc</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.theme">dark</option>
+        <option name="refresh.display">progressbar</option>
+      </viz>
+    </panel>
+  </row>
+  <row id="tab_scheduling">
+    <panel>
+      <title>Scheduled Next Run</title>
+      <input type="multiselect" token="tokSearchCategory" searchWhenChanged="true">
+        <label>Search Category</label>
+        <choice value=".*">ALL</choice>
+        <choice value="Alert">Alerts</choice>
+        <choice value="Correlation Search">Correlation Rules</choice>
+        <choice value="Scheduled Search">Scheduled Searches</choice>
+        <default>Correlation Search</default>
+        <initialValue>Correlation Search</initialValue>
+        <valuePrefix>match(category, "</valuePrefix>
+        <valueSuffix>")</valueSuffix>
+        <delimiter> OR </delimiter>
+      </input>
+      <viz type="event-timeline-viz.event-timeline-viz">
+        <search base="baseDetectionsSearch">
+          <query>$tab_scheduling_token$
+| eval category=if(match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]") , "Correlation Search", if(isnull(alert_threshold) OR alert_threshold == "", "Scheduled Search", "Alert"))
+| where disabled = 0 AND is_scheduled = 1 AND $tokSearchCategory$
+| eval label=coalesce(action.correlationsearch.label, title)
+| rename eai:acl.app as group, next_scheduled_time as start
+| eval color=case(category=="Scheduled Search", "#4872B1", category=="Correlation Search", "#138685", category=="Alert", "#004153", 1==1, "#AAAAAA")
+| eval tooltip = "Type: " + category + " - App: " + group + "\nCRON Schedule: " + cron_schedule + ", Schedule Priority: " + schedule_priority + ", Schedule Window: " + schedule_window + ", Realtime Schedule: " + realtime_schedule
+| table label, color, start, tooltip</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="event-timeline-viz.event-timeline-viz.backgroundColor">#212527</option>
+        <option name="event-timeline-viz.event-timeline-viz.eventColor">#d5ddf6</option>
+        <option name="event-timeline-viz.event-timeline-viz.maxZoom">315360000000000</option>
+        <option name="event-timeline-viz.event-timeline-viz.minZoom">1</option>
+        <option name="event-timeline-viz.event-timeline-viz.orientation">both</option>
+        <option name="event-timeline-viz.event-timeline-viz.showCurrentTime">true</option>
+        <option name="event-timeline-viz.event-timeline-viz.sortGroupsBy">time</option>
+        <option name="event-timeline-viz.event-timeline-viz.stack">true</option>
+        <option name="event-timeline-viz.event-timeline-viz.textColor">#ffffff</option>
+        <option name="event-timeline-viz.event-timeline-viz.tokenAllVisible">tok_et_all_visible</option>
+        <option name="event-timeline-viz.event-timeline-viz.tokenData">tok_et_data</option>
+        <option name="event-timeline-viz.event-timeline-viz.tokenEnd">tok_et_end</option>
+        <option name="event-timeline-viz.event-timeline-viz.tokenLabel">tok_et_label</option>
+        <option name="event-timeline-viz.event-timeline-viz.tokenStart">tok_et_start</option>
+        <option name="event-timeline-viz.event-timeline-viz.tooltipDateFormat">YYYY-MM-DD</option>
+        <option name="event-timeline-viz.event-timeline-viz.tooltipTimeFormat">HH:mm:ss</option>
+        <option name="height">681</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </viz>
+    </panel>
+  </row>
+  <row id="tab_scheduling_2">
+    <panel>
+      <title>Scheduled Search Details</title>
+      <table>
+        <title>Note: Real-time searches (based on Search Type) are performance intensive by nature - consider if you really need them in your environment.</title>
+        <search base="baseDetectionsSearch">
+          <query>$tab_scheduling_token$
+| eval category=if(match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]") , "Correlation Search", if(isnull(alert_threshold) OR alert_threshold == "", "Scheduled Search", "Alert"))
+| where disabled = 0 AND is_scheduled = 1 AND $tokSearchCategory$
+| eval Name = coalesce(action.correlationsearch.label,title)
+| eval search_type = if(match('dispatch.earliest_time',"rt"), "real-time", "scheduled")
+| eval schedule_type = if(realtime_schedule==1, "real-time scheduling", "continuous scheduling")
+| eval issue1 = if(search_type = "real-time", "Performance intensive scheduling mode", null())
+| eval issue2 = if(disabled=0 AND is_scheduled = 0, "Enabled but not scheduled", null())
+| eval issues = coalesce(mvappend(issue1, issue2), "None")
+| table next_scheduled_time, eai:acl.app, category, Name, cron_schedule, schedule_priority, schedule_window, search_type, schedule_type, issues
+| sort next_scheduled_time
+| rename eai:acl.app as App, next_scheduled_time as "Next Scheduled Time", category as Category, cron_schedule as "CRON Schedule", schedule_priority as "Schedule Priority", schedule_window as "Schedule Window", search_type as "Search Type", schedule_type as "Schedule Type", issues as "Potential Issues"</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+        <format type="color" field="Severity">
+          <colorPalette type="map">{"high":#DC4E41,"medium":#EC9960,"low":#F8BE34}</colorPalette>
+        </format>
+        <format type="color" field="schedule_priority">
+          <colorPalette type="map">{"default":#65778A,"higher":#F79702,"highest":#F96600}</colorPalette>
+        </format>
+        <format type="color" field="Category">
+          <colorPalette type="map">{"Scheduled Search":#4872B1,"Correlation Search":#138685,"Alert":#004153}</colorPalette>
+        </format>
+        <format type="color" field="Search Type">
+          <colorPalette type="map">{"real-time":#9E2520,"scheduled":#3C444D}</colorPalette>
+        </format>
+        <format type="color" field="Schedule Priority">
+          <colorPalette type="map">{"default":#65778A,"higher":#CBA700,"highest":#9E2520}</colorPalette>
+        </format>
+      </table>
+    </panel>
+  </row>
+  <row id="tab_scheduling_3">
+    <panel>
+      <title>Scheduled Searches by CRON grouping</title>
+      <table id="tableCronGroupings">
+        <title>Note: A percentage of searches higher than 5-10% with the same CRON Schedule is typically a good candidate for review.</title>
+        <search base="baseDetectionsSearch">
+          <query>$tab_scheduling_token$
+| eval category = if(match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]") , "Correlation Search", if(isnull(alert_threshold) OR alert_threshold == "", "Scheduled Search", "Alert")) 
+| where disabled = 0 AND is_scheduled = 1 AND $tokSearchCategory$
+| eval Name = coalesce(action.correlationsearch.label,title)
+| eventstats count as Total
+| stats values(Name) as Detections count by cron_schedule, Total
+| eval Percent = round(count/Total * 100, 2)
+| eval Results = count + "/" + Total
+| sort -Percent
+| rename cron_schedule as "CRON Schedule"
+| table "CRON Schedule", Results, Percent, Detections</query>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row id="tab_scheduling_4">
+    <panel>
+      <title>Scheduled Searches Distribution</title>
+      <chart>
+        <search base="baseDetectionsSearch" type="annotation">
+          <query>
+$tab_scheduling_token$
+| eval category=if(match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]") , "Correlation Search", if(isnull(alert_threshold) OR alert_threshold == "", "Scheduled Search", "Alert"))
+| where disabled = 0 AND is_scheduled = 1 AND $tokSearchCategory$
+| eval _time = strptime(next_scheduled_time, "%Y-%m-%d %H:%M:%S %Z")
+| bin span=1m _time
+| top limit=3 showperc=false _time
+| eval annotation_label = "High number of total searches: " + count
+| eval annotation_category = "Warning"
+          </query>
+        </search>
+        <search base="baseDetectionsSearch">
+          <query>
+$tab_scheduling_token$
+| eval category=if(match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]") , "Correlation Search", if(isnull(alert_threshold) OR alert_threshold == "", "Scheduled Search", "Alert"))
+| where disabled = 0 AND is_scheduled = 1 AND $tokSearchCategory$
+| eval _time = strptime(next_scheduled_time, "%Y-%m-%d %H:%M:%S %Z")
+| timechart cont=false span=30s count as "Scheduled Searches" by category</query>
+        </search>
+        <option name="charting.annotation.categoryColors">{"Warning":"#f96600"}</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.fieldColors">{"Correlation Search": 0x35c38f, "Scheduled Search": 0x4872b1, "Alert":0x00c3f9, "NULL":0xabbfcd}</option>
+        <option name="height">366</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+</form>
