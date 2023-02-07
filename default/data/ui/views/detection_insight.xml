@@ -4,7 +4,9 @@
   <!-- Base search to determine if the lookup used in the default base search has been populated or not -->
   <search id="checkBaseLookupIsPopulated">
     <query>
-      | rest splunk_server=local /services/admin/lookup-table-files/all_saved_searches.csv | fields title
+      | rest splunk_server=local /services/admin/lookup-table-files 
+      | fields title
+      | search title = "all_saved_searches.csv"
     </query>
   </search>
   <!-- Base search for saved searches, which include ES correlation searches -->
