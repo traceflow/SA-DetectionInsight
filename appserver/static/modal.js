@@ -1,7 +1,7 @@
 'use strict';
 
-console.log("Here's my code path", document.currentScript)
-console.log("Trying again", [].slice.call(document.querySelectorAll('script[src]')).pop().src.replace(/.*?static\/app\/([^\/]*).*/, "$1"))
+//console.log("Here's my code path", document.currentScript)
+//console.log("Trying again", [].slice.call(document.querySelectorAll('script[src]')).pop().src.replace(/.*?static\/app\/([^\/]*).*/, "$1"))
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function(obj) { return typeof obj; } : function(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var _createClass = function() {
@@ -82,8 +82,7 @@ define(['underscore'], function(_) {
             this.footer.css('position', 'relative');
             this.footer.css('z-index', 1);
 
-            console.log("Here's my code path 2", document.currentScript)
-
+            //console.log("Here's my code path 2", document.currentScript)
 
             this.$el = $('<div>').addClass('modal hide fade mlts-modal').attr('id', modalId).append($('<div>').addClass('modal-dialog').append($('<div>').addClass('modal-content').append(header.append(headerCloseButton, this.title), this.body, this.footer)));
 
