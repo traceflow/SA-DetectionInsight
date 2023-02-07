@@ -71,6 +71,63 @@ td.data-bar-cell .data-bar-wrapper .data-bar {
     padding-left: 5px;
 }
 
+#tableAnnotations {
+    width: 100%; 
+    font-family: Splunk Platform Sans;
+}
+
+.annotationHeader {
+}
+
+.annotationDiv {
+    padding: 3px 10px 3px 10px;
+    border-radius: 15px;
+    border: 1px solid #2b3033;
+    width: fit-content;
+    margin-bottom: 5px;  
+    background-color: #777777; 
+}
+
+.annotationStories {
+    background-color: #305662;
+}
+
+.annotationCIS20 {
+    background-color: ##98062d;
+}
+
+.annotationContext {
+    background-color: #2EA39B;   
+}
+
+.annotationCVEs {
+    background-color: #567d99;
+}
+
+.annotationKillchain {
+    background-color: #6e8da9;
+}
+
+.annotationMITRE {
+    background-color: #D94E17;
+}
+
+.annotationNIST {
+    background-color: #277C52;
+}
+
+.annotationDiv > a {
+    color: white;
+}
+
+.annotationTooltip + .tooltip > .tooltip-inner {
+    font-size: 14px;
+    font-weight: 400;
+    font-family: Splunk Platform Sans;
+    color: white;
+    background-color: #212527;
+}
+
 #dendrogramViz {
     border: 1px solid #65778a;
     background-color: #2b3033;

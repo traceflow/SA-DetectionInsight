@@ -6,8 +6,9 @@ require([
     'splunkjs/mvc/dropdownview',
     'views/shared/results_table/renderers/BaseCellRenderer',
     'splunkjs/mvc/visualizationregistry',
+    '/static/app/SA-DetectionInsight/modal.js',
     'splunkjs/mvc/simplexml/ready!'
-], function(_, mvc, PostProcessManager, TableView, DropdownView, BaseCellRenderer, VisualizationRegistry) {
+], function(_, mvc, PostProcessManager, TableView, DropdownView, BaseCellRenderer, VisualizationRegistry, Modal) {
     console.log("Loading detection_insight.js");
 
     // Adds a percent bar to the table cell.
@@ -175,18 +176,19 @@ require([
         }
     });
 
-    // Setup a SearchManager to display the detection details (Description, SPL, other information).
+    // Setup SearchManagers to display the detection details (Description, SPL, other information).
     var TableDetectionDetailsRowExpansionRenderer = TableView.BaseRowExpansionRenderer.extend({
         initialize: function() {
-            // initialize will run once, so we will set up a search to be reused.
+            // initialize will run once, so we will set up search managers to be reused.
             this._searchManager = new PostProcessManager({
                 id: "detection-details-manager",
                 managerid: "baseDetectionsSearch"
             });
 
-            this._searchManagerDg = new PostProcessManager({
-                id: "detection-dendrogram-manager",
-                managerid: "baseDetectionsSearch"
+            this._searchAnnotationsManager = new PostProcessManager({
+                id: "detection-annotations-manager",
+                managerid: "baseDetectionsSearch",
+                preview: false
             });
 
             this._tableView = new TableView({
@@ -196,18 +198,6 @@ require([
                 wrap: "true"
             });
             this._tableView.addCellRenderer(new TableDetectionDetailsCellRenderer());
-
-            this._dropdownView = new DropdownView({
-                id: "dropdownDg",
-                default: "mitre_attack",
-                choices: [{label:"Analytic Story", value: "analytic_story"}, {label:"CVEs", value: "cve"}, {label:"KillChain Phases", value: "kill_chain_phases"}, {label:"MITRE ATT&CK", value: "mitre_attack"}, {label:"Observables", value: "observable"}]
-            });
-
-            var dendrogramViz = VisualizationRegistry.getVisualizer('dendrogram_viz', 'dendrogram_viz');
-            this._dendrogramView = new dendrogramViz({
-                id: "dendrogramViz",
-                managerid: "detection-dendrogram-manager"
-            });
         },
         canRender: function(rowData) {
             return true;
@@ -222,55 +212,190 @@ require([
             var spl = '`get_detection_details("' + nameCell.value + '")`';
             console.log("SPL Query:", spl);
 
-            this._dropdownView.settings.set("value", "mitre_attack");
-            var splDg = '`get_detection_details_mitre_attack("' + nameCell.value + '")`';
-            console.log("Dendrogragh SPL Query:", splDg);
+            var splAnnotations = '`get_detection_annotations("' + nameCell.value + '")`';
+            console.log("SPL Annotations Query:", splAnnotations);
 
-            var dropdownDetailsLabel = $("<label>", {id: "dropdownDgLabel", for: "dropdownDg", style: "padding-left: 14px; padding-top: 10px; font-family: Splunk Platform Sans"});
-            dropdownDetailsLabel.text("Display relations for:");
-
-            // Setup the Search Manager.
+            // Setup the Search Managers searches.
             this._searchManager.set({ search: spl });
-            this._searchManagerDg.set({ search: splDg });
-
-            // Respond to a change event
-            var searchManager = this._searchManagerDg;
-            this._dropdownView.on("change", function(e) {
-                switch (e) {
-                    case "analytic_story":                    
-                        macroName = "get_detection_details_analytic_story";
-                        break;
-                    case "cve":                    
-                        macroName = "get_detection_details_cve";
-                        break;
-                    case "kill_chain_phases":
-                        macroName = "get_detection_details_killchain";
-                        break;
-                    case "mitre_attack":            
-                        macroName = "get_detection_details_mitre_attack";
-                        break;
-                    case "observable":
-                        macroName = "get_detection_details_observable";
-                        break;
-                    default:
-                        console.error("Unexpected dropdown token value: ", checkCell.value);
-                }
-                var spl = '`' + macroName + '("' + nameCell.value + '")`';
-                console.log("Updating Dendrogram SPL to: ", searchManager.settings.get("search"));
-                searchManager.settings.unset("search");
-                searchManager.settings.set("search", spl);
-            });
+            this._searchAnnotationsManager.set({ search: splAnnotations });
 
             // $container is the jquery object where we can put out content.
             $container.addClass("details-cell");
             $container.append(this._tableView.render().el);
-            $container.append(dropdownDetailsLabel);
-            $container.append(this._dropdownView.render().el);
-            $container.append(this._dendrogramView.render().el);
+
+            var annotationData = this._searchAnnotationsManager.data("results");
+            annotationData.on("data", function() {
+                if ($('#tableAnnotations').length) {
+                     $('#tableAnnotations').remove();
+                }
+
+                // Get the backing Backbone collection's data.
+                var collection = annotationData.collection();
+                var model = collection.at(0);
+                var annotationResults = model.attributes;
+
+                var analyticStories = [].concat(annotationResults["analytic_story"] || "N/A");
+                var context = [].concat(annotationResults["context"] || "N/A");
+                var cis20 = [].concat(annotationResults["cis20"] || "N/A");
+                var cves = [].concat(annotationResults["cve"] || "N/A");
+                var killChain = [].concat(annotationResults["kill_chain_phases"] || "N/A");
+                var mitreAttack = [].concat(annotationResults["mitre_attack"] || "N/A");
+                var nist = [].concat(annotationResults["nist"] || "N/A");
+                var observables = [].concat(annotationResults["observable"] || "N/A");
+
+                // Render using a custom HTML table.
+                var annotationTable = $("<table>", {id: "tableAnnotations"});
+                annotationTable.append('<tr><td id="annotationContext"/><td id="annotationStories"/><td id="annotationCVEs"/><td id="annotationMitre"/><td id="annotationCIS20"/><td id="annotationNIST"/><td id="annotationKillchain"/></tr>');
+                $container.append(annotationTable);
+
+                $('#annotationStories').append("<h3 class='annotationHeader'>Analytic Stories</h3>");
+                _.each(analyticStories, function(val, key) {
+                    var entry = $("<div>", {class: "annotationDiv"});
+                    if (val != "N/A") {
+                        var link = $("<a>", {href: "/app/SplunkEnterpriseSecuritySuite/ess_analytic_story_details?analytic_story=" + val, target: "_blank", text: val});
+                        link.on("click", function() {
+                            window.open($(this).attr("href"));
+                        });
+                        entry.addClass("annotationStories");
+                        entry.append(link);
+                    } else {
+                        entry.text(val);
+                    }
+                    $('#annotationStories').append(entry);
+                });
+
+                $('#annotationContext').append("<h3 class='annotationHeader'>Context</h3>");
+                _.each(context, function(val, key) {
+                    var entry = $("<div>", {class: "annotationDiv", text: val});
+                    if (val != "N/A") {
+                        entry.addClass("annotationContext");
+                    }
+                    $('#annotationContext').append(entry);
+                });
+
+                $('#annotationCIS20').append("<h3 class='annotationHeader'>CIS 20</h3>");
+                _.each(cis20, function(val, key) {
+                    var entry = $("<div>", {
+                        class: "annotationDiv annotationTooltip",
+                        "data-placement": "right"
+                    });
+                    if (val != "N/A") {
+                        // The CIS20 field comes as a pipe separated multivalue containing: <Control ID>|<Description>.
+                        var fields = [].concat(val.split("|"));
+                        var link = $("<a>", {
+                            href: "https://www.cisecurity.org/controls/cis-controls-list", 
+                            target: "_blank", 
+                            text: fields[0]
+                        });
+                        link.on("click", function() {
+                            window.open($(this).attr("href"));
+                        });
+                        entry.addClass("annotationCIS20");
+                        entry.append(link);
+                        // Setup tooltip.
+                        entry.attr("title", fields[1]);
+                        entry.tooltip();
+                    } else {
+                        entry.text(val);
+                    }
+                    $('#annotationCIS20').append(entry);
+                });
+
+                 $('#annotationCVEs').append("<h3 class='annotationHeader'>CVEs</h3>");
+                _.each(cves, function(val, key) {
+                    var entry = $("<div>", {class: "annotationDiv"});
+                    if (val != "N/A") {
+                        var link = $("<a>", {href: "https://nvd.nist.gov/vuln/detail/" + val, target: "_blank", text: val});
+                        link.on("click", function() {
+                            window.open($(this).attr("href"));
+                        });
+                        entry.addClass("annotationCVEs");
+                        entry.append(link);
+                    } else {
+                        entry.text(val);
+                    }
+                    $('#annotationCVEs').append(entry);
+                });
+
+                $('#annotationKillchain').append("<h3 class='annotationHeader'>KillChain Phases</h3>");
+                _.each(killChain, function(val, key) {
+                    var entry = $("<div>", {class: "annotationDiv"});
+                    if (val != "N/A") {
+                        var link = $("<a>", {href: "https://www.lockheedmartin.com/en-us/capabilities/cyber/cyber-kill-chain.html", target: "_blank", text: val});
+                        link.on("click", function() {
+                            window.open($(this).attr("href"));
+                        });
+                        entry.addClass("annotationKillchain");
+                        entry.append(link);
+                    } else {
+                        entry.text(val);
+                    }
+                    $('#annotationKillchain').append(entry);
+                });
+
+                $('#annotationMitre').append("<h3 class='annotationHeader'>MITRE ATT&amp;CK</h3>");
+                _.each(mitreAttack, function(val, key) {
+                    var entry = $("<div>", {
+                        class: "annotationDiv annotationTooltip",
+                        "data-placement": "right"
+                    });
+                    if (/^T[\d\.]+/.test(val)) {
+                        // The mitre technique field comes as a pipe separated multivalue containing: <ID>|<Technique Description>.
+                        var fields = [].concat(val.split("|"));
+                        var link = $("<a>", {
+                            href: "https://attack.mitre.org/techniques/" + fields[0].replace(/\./g, "\/"), 
+                            target: "_blank", 
+                            text: fields[0]
+                        });
+                        link.on("click", function() {
+                            window.open($(this).attr("href"));
+                        });
+                        entry.addClass("annotationMITRE");
+                        entry.append(link);
+                        // Setup tooltip.
+                        entry.attr("title", fields[1]);
+                        entry.tooltip();
+                    } else {
+                        entry.text(val);
+                    }
+                    $('#annotationMitre').append(entry);
+                });
+
+                $('#annotationNIST').append("<h3 class='annotationHeader'>NIST</h3>");
+                _.each(nist, function(val, key) {
+                    var entry = $("<div>", {
+                        class: "annotationDiv annotationTooltip",
+                        "data-placement": "right"
+                    });
+                    if (val != "N/A") {
+                        // The NIST field comes as a pipe separated multivalue containing: <ID>|<Description>.
+                        var fields = [].concat(val.split("|"));
+                        // The ID is actually the Category and Function 2 letter codes separated by a dot, e.g.: ID.AM.
+                        var categories = [].concat(fields[0].split("."));
+                        if (categories.length >= 2) 
+                        var link = $("<a>", {
+                            href: "https://csf.tools/reference/nist-cybersecurity-framework/v1-1/" + categories[0] + "/" + categories[1] + "/", 
+                            target: "_blank", 
+                            text: fields[0]
+                        });
+                        link.on("click", function() {
+                            window.open($(this).attr("href"));
+                        });
+                        entry.addClass("annotationNIST");
+                        entry.append(link);
+                        // Setup tooltip.
+                        entry.attr("title", fields[1]);
+                        entry.tooltip();
+                    } else {
+                        entry.text(val);
+                    }
+                    $('#annotationNIST').append(entry);
+                });
+            });
         }
     });
 
-    // Register customer classes against our TableView(s).
+    // Register custom classes against our TableView(s).
     mvc.Components.get('tableDetectionChecks').getVisualization(function(tableView) {
         tableView.addCellRenderer(new DataBarPercentCellRenderer());
         tableView.addRowExpansionRenderer(new TableDetectionChecksRowExpansionRenderer());
@@ -282,4 +407,41 @@ require([
     mvc.Components.get('tableCronGroupings').getVisualization(function(tableView) {
         tableView.addCellRenderer(new DataBarPercentCellRenderer());
     });
+
+    // Check initial setup has been done.
+    var tokens = mvc.Components.get("default");
+    var tokenSetupValue = tokens.get("isLookupPopulated");
+    if(!tokens.get("isLookupPopulated")) {
+        var myModal = new Modal("modalInitialSetup", {
+                title: "Important Note - Initial Setup",
+                backdrop: 'static',
+                keyboard: true,
+                destroyOnHide: true,
+                type: 'normal'
+            });
+        myModal.body.append($('<p>This add-on uses a lookup which is generated by the saved search named <b>DetectionInsight - All Saved Searches - Lookup Gen</b>.</p>' +
+            '<p>It seems the search has not been run yet as the lookup is empty.</p>' +
+            '<p>Click <a href="/app/SA-DetectionInsight/report?s=%2FservicesNS%2Fnobody%2FSA-DetectionInsight%2Fsaved%2Fsearches%2FDetectionInsight%2520-%2520All%2520Saved%2520Searches%2520-%2520Lookup%2520Gen&sid=scheduler__admin_U0EtRGV0ZWN0aW9uSW5zaWdodA__RMD586b1ea75a1534aa3_at_1675794780_3372&display.page.search.mode=fast&dispatch.sample_ratio=1&q=%7C%20rest%20splunk_server%3Dlocal%20count%3D0%20%2Fservices%2Fsaved%2Fsearches%0A%7C%20outputlookup%20all_saved_searches.csv&earliest=-15m&latest=now">here</a> to go to the report and run it/ensure it is scheduled.</p>'));
+        var myDiv = $('<div>').attr({
+            style: "text-align: left; width: 100%;"
+        });
+        myDiv.append($('<label>').attr({
+            for: "chkNoReminder",
+            style: "display: inline-block; margin-right: 1em;"
+        }).text("Do not show again"));
+        myDiv.append($('<input>').attr({
+            id: "chkNoReminder",
+            type: "checkbox",
+            style: "display: inline-block;"
+        }));
+        myModal.footer.append(myDiv);
+        myModal.footer.append($('<button>').attr({
+            type: 'button',
+            'data-dismiss': 'modal',
+            class: 'btn btn-primary'
+        }).text('Close').on('click', function() {
+            console.log($("#chkNoReminder").is(':checked'));
+        }));
+        myModal.show();
+    }
 });
