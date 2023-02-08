@@ -556,9 +556,10 @@ $tab_overview_token$
     | rename title as Title, mitre_attack{} as Technique 
     | mvexpand Technique 
     | eval Technique = replace(Technique, "([Tt]\d+)(\.\d+|)", "\1") ]
-| eval count=if(action=="disabled",0,1) 
+| eval count=if(action=="disabled",-1,1) 
 | eval Title=if(action=="disabled",Title + " (Removed)",Title + " (Added)") 
-| table Technique count Title</query>
+| stats sum(count) as count values(Title) as Title by Technique
+| table Technique, count, Title</query>
           <earliest>$tokNotablesTime.earliest$</earliest>
           <latest>$tokNotablesTime.latest$</latest>
         </search>
@@ -589,7 +590,7 @@ $tab_overview_token$
     | rename title as Title, mitre_attack{} as Technique 
     | mvexpand Technique 
     | eval Technique = replace(Technique, "([Tt]\d+)(\.\d+|)", "\1") ]
-| eval count=if(disabled == 1, 0, 1) 
+| eval count=if(disabled == 1, -1, 1) 
 | eval Title=if(disabled == 1, Title + " (Removed)", Title + " (Added)") 
 | stats count as notneeded by Technique count Title
 | table Technique count Title</query>
