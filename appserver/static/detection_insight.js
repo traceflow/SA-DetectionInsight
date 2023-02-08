@@ -414,8 +414,12 @@ require([
     // This runs a search to check if the lookup file exists and return it's name if it does.
     // If this returns no results, inform the user and give him/her a chance to configure it properly.
     if(localStorage.getItem('SA-DetectionInsight_doNotShowSetupDialog') === null) {
+        var searchId = "checkBaseLookupIsPopulated"
+        if (typeof mvc.Components.getInstance(searchId) == "object") {
+            mvc.Components.revokeInstance(searchId)
+        }
         var searchManager = new SearchManager({
-            "id": "checkBaseLookupIsPopulated",
+            "id": searchId,
             "cancelOnUnload": true,
             "latest_time": "",
             "status_buckets": 0,
