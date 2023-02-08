@@ -211,6 +211,8 @@ I plan to keep on improving this add-on, for example by adding additional checks
 
 If you have feedback on this supporting add-on for Splunk ES (improvement ideas, issues, questions), feel free to contact me via email or open an issue on this project on GitHub.
 
+This add-on was run through [AppInspect](https://dev.splunk.com/enterprise/docs/developapps/testvalidate/appinspect/) and any issues corrected to the best of my knowledge.
+
 ## Credits
 
 > Thanks to people who provided initial feedback on this add-on.  You know who you are!
