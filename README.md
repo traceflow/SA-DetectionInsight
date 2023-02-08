@@ -1,3 +1,5 @@
+![Logo](static/appLogo_2x.png)
+
 # SA-DetectionInsight
 
 ## Overview
