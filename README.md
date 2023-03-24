@@ -24,7 +24,7 @@ _Overview_
 _Detection Details_
 
 - Now includes a column to identify if a detection uses machine-learning features
-- Add Risk Score to the table, removed MITRE TEchnique (can still filter on it)
+- Add Risk Score to the table, removed MITRE Technique (can still filter on it)
 - Added 10 different checks for potential issues
 - Added Confidence and Impact details to the expanded detection section
 - Minor cosmetic improvements
