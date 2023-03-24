@@ -1,3 +1,9 @@
+.dashboard-row .dashboard-panel .panel-head h3 {
+    border: 1px dashed #90BAD0;
+    border-left: 6px solid #90BAD0;
+    font-weight: normal;
+}
+
 #tableDetails tr.odd > td.yes-cell {
     background-color: #1E6F52 !important;
 }
@@ -23,7 +29,12 @@
 }
 
 #tableDetectionChecks td.details-cell {
-    border-left: 5px solid #20689C;
+    border-left: 5px solid #90BAD0;
+    border-bottom: 1px dashed #90BAD0;
+}
+
+#tableDetectionChecks td.string {
+    font-family: Splunk Platform Sans;
 }
 
 #tableDetectionExpandedDetails tr.odd > td.yes-cell {
@@ -51,7 +62,12 @@
 }
 
 #tableDetectionDetails td.details-cell {
-    border-left: 5px solid #20689C;
+    border-left: 5px solid #90BAD0;
+    border-bottom: 1px dashed #90BAD0;
+}
+
+#tableDetectionDetails td.string {
+    font-family: Splunk Platform Sans;
 }
 
 td.data-bar-cell {
@@ -69,6 +85,23 @@ td.data-bar-cell .data-bar-wrapper .data-bar {
     min-width: 1px;
     background-color: #294165;
     padding-left: 5px;
+}
+
+/* Hide the two last rows of this Table visualization, as they are used for drilldowns only. */
+#statistics > table > thead > tr > th:nth-child(5) {
+    display: none;
+}
+
+#statistics > table > tbody > tr > td:nth-child(5) {
+    display: none;
+}
+
+#statistics > table > thead > tr > th:nth-child(6) {
+    display: none;
+}
+
+#statistics > table > tbody > tr > td:nth-child(6) {
+    display: none;
 }
 
 #tableAnnotations {
@@ -114,6 +147,14 @@ td.data-bar-cell .data-bar-wrapper .data-bar {
 
 .annotationNIST {
     background-color: #277C52;
+}
+
+.annotationConfidence {
+    background-color: #182C37;
+}
+
+.annotationImpact {
+    background-color: #D10404;
 }
 
 .annotationDiv > a {
