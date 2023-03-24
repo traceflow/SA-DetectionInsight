@@ -8,8 +8,31 @@
 
 |                       |                                                         |
 |-----------------------|---------------------------------------------------------|
-| Version               | 1.0.0                                                   |
+| Version               | 1.0.1                                                   |
 | Visible in Splunk Web | No.                                                     |
+
+### Release Notes
+
+**v1.0.0** - Initial release
+
+**v1.0.1** - Released 2023-03-24
+
+_Overview_
+
+- Added the ability to add checks based on unmanaged annotations, for example to map Atomic Red Team Test GUID(s) to detections
+
+_Detection Details_
+
+- Now includes a column to identify if a detection uses machine-learning features
+- Add Risk Score to the table, removed MITRE TEchnique (can still filter on it)
+- Added 10 different checks for potential issues
+- Added Confidence and Impact details to the expanded detection section
+- Minor cosmetic improvements
+
+_Scheduling Details_
+
+- Added additional checks for potential issues
+
 
 ## Description
 
