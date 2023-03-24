@@ -1,0 +1,10 @@
+check_name,details_search_macro,details_search_label
+"Detection has a Contributing Event Search",get_contributing_search_details,"Has Search?"
+"Detection generates Notable Events",get_notable_details,"Generates Notable Event?"
+"Detection generates Risk",get_risk_details,"Contributes Risk?"
+"Detection uses Threat Intelligence Management Action",get_tim_details,"Uses Threat Intealligence Management?"
+"Detection is mapped to MITRE Att&ck",get_mitre_details,"Mapped to MITRE?"
+"Detection is mapped to CIS20",get_cis20_details,"Mapped to CIS20?"
+"Detection is mapped to NIST",get_nist_details,"Mapped to NIST?"
+"Detection is mapped to KillChain",get_killchain_details,"Mapped to KillChain?"
+"Detection is mapped to Atomic Red Team Tests",get_atomic_red_team_details,"Mapped to Atomic Red Team?"
