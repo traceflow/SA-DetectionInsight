@@ -38,13 +38,6 @@
   <row id="tabs">
     <panel>
       <html>
-        <style>
-          .dashboard-row .dashboard-panel .panel-head h3 {
-             border: 1px dashed #20689C;
-             border-left: 6px solid #20689C;
-             font-weight: normal;
-          }
-        </style>
         <!-- Modals -->
         <div id="modalInitialSetup"/>
         <!-- Tabs -->
@@ -122,7 +115,7 @@ $tab_overview_token$
   </row>
   <row id="tab_overview_2">
     <panel>
-      <title>Detections Details</title>
+      <title>Detections Checks</title>
       <input type="dropdown" token="tokStatusOverview" searchWhenChanged="true">
         <label>Status</label>
         <choice value="*">All</choice>
@@ -156,13 +149,14 @@ $tab_overview_token$
 | where isnotnull('action.correlationsearch.enabled')
 | fillnull value="NONE" action.notable.param.security_domain
 | search disabled=$tokStatusOverview$ $tokDomainOverview$
-| stats count as Total count(eval(isnotnull('action.notable.param.drilldown_search'))) as "Detection has a Contributing Event Search" count(eval(match('actions',"notable"))) as "Detection generates Notable Events" count(eval(match('actions',"risk"))) as "Detection generates Risk" count(eval(match('actions',"trustar_submit_event"))) as "Detection uses Threat Intelligence Management Action" count(eval(match('action.correlationsearch.annotations',"mitre_attack"))) as "Detection is mapped to MITRE Att&amp;ck" count(eval(match('action.correlationsearch.annotations',"cis20"))) as "Detection is mapped to CIS20" count(eval(match('action.correlationsearch.annotations',"nist"))) as "Detection is mapped to NIST" count(eval(match('action.correlationsearch.annotations',"kill_chain_phases"))) as "Detection is mapped to KillChain"
+| stats count as Total count(eval(isnotnull('action.notable.param.drilldown_search'))) as "Detection has a Contributing Event Search" count(eval(match('actions',"notable"))) as "Detection generates Notable Events" count(eval(match('actions',"risk"))) as "Detection generates Risk" count(eval(match('actions',"trustar_submit_event"))) as "Detection uses Threat Intelligence Management Action" count(eval(match('action.correlationsearch.annotations',"mitre_attack"))) as "Detection is mapped to MITRE Att&amp;ck" count(eval(match('action.correlationsearch.annotations',"cis20"))) as "Detection is mapped to CIS20" count(eval(match('action.correlationsearch.annotations',"nist"))) as "Detection is mapped to NIST" count(eval(match('action.correlationsearch.annotations',"kill_chain_phases"))) as "Detection is mapped to KillChain" `get_other_unmanaged_annotations_counts`
 | foreach *
   [ eval "&lt;&lt;FIELD&gt;&gt;" = '&lt;&lt;FIELD&gt;&gt;' + "/" + Total ]
 | fields - Total*
 | transpose
 | rename column as Check "row 1" as Results
-| eval Percent = round(tonumber(mvindex(split(Results,"/"),0)) / tonumber(mvindex(split(Results,"/"),1)) * 100, 2)</query>
+| eval Percent = round(tonumber(mvindex(split(Results,"/"),0)) / tonumber(mvindex(split(Results,"/"),1)) * 100, 2)
+| lookup check_to_macro_map_lookup check_name as Check OUTPUT details_search_macro, details_search_label</query>
         </search>
         <option name="drilldown">none</option>
         <option name="refresh.display">progressbar</option>
@@ -324,7 +318,8 @@ $tab_overview_token$
 | search title="$tokName$"
 | eval isEnabled=if(disabled == 0, "True", "False") 
 | where isnotnull('action.correlationsearch.enabled') AND $tokStatus$
-| fillnull value="&lt;none&gt;" action.notable.param.security_domain 
+| fillnull value="&lt;none&gt;" action.notable.param.security_domain
+| eval actions = if(isnull(actions) OR actions == "", "&lt;none&gt;", actions)
 | spath input=action.correlationsearch.annotations 
 | rename mitre_attack{} as Technique
 | fillnull value="" Technique
@@ -338,8 +333,13 @@ $tab_overview_token$
     | rename title AS macro_name_normalized] 
 | eval expanded_search = if(isnotnull(definition), replace(search, "\`" + macro_name + "\`", definition), search)
 | eval command_type = case(match(expanded_search, "(?i)^\s*\|\s*from datamodel"), "datamodel", match(expanded_search, "(?i)^\s*\|\s*tstats"), "tstats", match(expanded_search, "(?i)^\s*\|\s*(from |)inputlookup"), "lookup", isnotnull(definition) AND match(expanded_search, "(?i)(eventtype\s*=\s*|source\s*=\s*|sourcetype\s*=\s*|index\s*=\s*).*?\|"), "macro (raw data search)", match(expanded_search, "^\s*(\||)\s*\`"), "macro", match(expanded_search, "(?i)^\s*\|\s*rest"), "rest", match(expanded_search, "(?i)(eventtype\s*=\s*|source\s*=\s*|sourcetype\s*=\s*|index\s*=\s*|tag\s*=\s*|tag\s+in\s+).*?\|"), "raw data search", true(), "other")
+| rex field="expanded_search" "(?i)from datamodel[:=]+\"*(?&lt;datamodel&gt;.*?)[\"\.]+"
+| lookup all_datamodels_lookup datamodel OUTPUT accelerated, size, average_time, last_error
 | eval "Provided By" = case('eai:acl.app'=="DA-ESS-ContentUpdate", "ESCU", match('eai:acl.app', "DA-ESS-.*|SA-.*Protection|SA-IdentityManagement|SA-ThreatIntelligence|SplunkEnterpriseSecurity"), "ES", true(), "Other") 
-| rename id as _id, eai:acl.app as Application, title as Name, action.notable.param.security_domain as Domain, actions as "Adaptive Response Actions", isEnabled as "Enabled?"
+| spath input=action.risk.param._risk
+| eval risk_score = mvindex(coalesce('{}.risk_score', 'action.risk.param._risk_score'), 0)
+| eval risk_score = if(isnull(risk_score) OR risk_score=="", 0, risk_score)
+| rename id as _id, eai:acl.app as Application, title as Name, action.notable.param.security_domain as Domain, isEnabled as "Enabled?"
 | eval Domain = lower(Domain) 
 | join Name type=outer 
     [ search index=notable OR index=risk earliest=-24h latest=now
@@ -349,8 +349,30 @@ $tab_overview_token$
 | where $tokTrigger$
 | search $tokMainCommand$
 | makemv delim="," "Triggering Trend" 
-| rename command_type as "Main SPL Command"
-| table , Name, "Triggering Trend", "Enabled?", "Provided By", Application, Domain, "Main SPL Command", "Adaptive Response Actions", Technique</query>
+| eventstats avg(risk_score) as avg_risk_score
+| eval risk_score_dev = risk_score / avg_risk_score
+| rex field=expanded_search "(?i)(mltk_apply_upper[\(\"]+app:|\|\s*apply\s(app:|))(?&lt;model_name&gt;.*?)[\"\s]"
+| eval usesML = if(isnotnull(model_name) AND model_name != "", "True", "False")
+| eval model_exists = 0
+| join type=outer model_name [
+   | listmodels
+   | eval model_exists = 1
+   | rename name as model_name
+]
+| eval issue1 = if(isnotnull(datamodel) AND accelerated=="false", "Uses a non-accelerated data model (" + datamodel + ")", null())
+| eval issue2 = if(isnotnull(datamodel) AND size==0, "Uses an empty data model (" + datamodel + ")", null())
+| eval issue3 = if(isnotnull(datamodel) AND last_error!="", "Uses a data model with recent acceleration errors (" + datamodel + ")", null())
+| eval issue4 = if(isnotnull(datamodel) AND (datamodel == "Application_State" OR datamodel == "Change_Analysis"), "Uses a deprecated data model (" + datamodel + ")", null())
+| eval issue5 = if(actions=="&lt;none&gt;", "Has no actions defined", null())
+| eval issue6 = if(Domain == "&lt;none&gt;", "Not mapped to a Security Domain", null())
+| eval issue7 = if(isnull(Technique) OR Technique == "", "Not mapped to MITRE ATT&amp;CK", null())
+| eval issue8 = if(match(actions, "risk") AND risk_score == 0, "Should generate non-zero risk", null())
+| eval issue9 = if(risk_score &gt; 0 AND (risk_score_dev &gt;= 10 OR risk_score_dev &lt;= 0.1), "Significant Risk Score deviation from average", null())
+| eval issue10 = if(isnotnull(model_name) AND model_exists == 0, "Uses missing machine-learning model (" + model_name + ")", null())
+| eval issues = coalesce(mvappend(issue1, issue2, issue3, issue4, issue5, issue6, issue7, issue8, issue9, issue10), "None")
+| eval issues_count = coalesce(mvcount(mvfilter(issues!="None")), 0)
+| rename actions as "Actions", risk_score as "Risk Score", usesML as "Uses Machine Learning?", command_type as "Main SPL Command", issues_count as "Potential Issue(s)", issues as "Issue Details"
+| table Name, "Triggering Trend", "Enabled?", "Provided By", Application, Domain, "Main SPL Command", "Uses Machine Learning?", "Actions", "Risk Score", "Potential Issue(s)", "Issue Details"</query>
         </search>
         <option name="drilldown">none</option>
         <option name="refresh.display">progressbar</option>
@@ -361,7 +383,24 @@ $tab_overview_token$
           <colorPalette type="map">{"ES":#3C444D,"ESCU":#2EA39B,"Other":#65778A}</colorPalette>
         </format>
         <format type="color" field="Domain">
-          <colorPalette type="map">{"access":#ABBFDC,"audit":#A3E5CD,"endpoint":#98F0EF,"identity":#169C9B,"network":#3E6297,"threat":#004153,"&lt;none&gt;":#65778A}</colorPalette>
+          <colorPalette type="map">{"access":#ABBFDC,"audit":#A3E5CD,"endpoint":#98F0EF,"identity":#169C9B,"network":#3E6297,"threat":#004153,"&lt;none&gt;":#9E2520}</colorPalette>
+        </format>
+        <format type="color" field="Risk Score">
+          <colorPalette type="minMidMax" maxColor="#D41F1F" minColor="#FFFFFF"></colorPalette>
+          <scale type="minMidMax"></scale>
+        </format>
+        <format type="color" field="Adaptive Response Actions">
+          <colorPalette type="map">{"&lt;none&gt;":#9E2520}</colorPalette>
+        </format>
+        <format type="color" field="Potential Issue(s)">
+          <colorPalette type="list">[#1E6F52,#9E2520]</colorPalette>
+          <scale type="threshold">1</scale>
+        </format>
+        <format type="color" field="Actions">
+          <colorPalette type="map">{"&lt;none&gt;":#9E2520}</colorPalette>
+        </format>
+        <format type="color" field="Uses Machine Learning?">
+          <colorPalette type="map">{"True":#1E6F52,"False":#65778A}</colorPalette>
         </format>
         <format field="Triggering Trend" type="sparkline">
           <option name="lineColor">#1fdad9</option>
@@ -384,9 +423,9 @@ $tab_overview_token$
       </input>
       <input type="multiselect" token="tokChangeActions" searchWhenChanged="true">
         <label>Include</label>
-        <choice value="Enabled">Searches Enabled</choice>
-        <choice value="Disabled">Searches Disabled</choice>
-        <choice value="Modified">Searches Modified</choice>
+        <choice value="Enabled">Enabled Searches</choice>
+        <choice value="Disabled">Disabled Searches</choice>
+        <choice value="Modified">Modified Searches</choice>
         <default>Enabled,Disabled</default>
         <prefix>(</prefix>
         <suffix>)</suffix>
@@ -403,7 +442,7 @@ $tab_overview_token$
         <initialValue>*</initialValue>
       </input>
       <table>
-        <title>Note: Detections enabled/disabled only do not additionally show as modifications. Uses the _configtracker index since this is an on-premises deployment.</title>
+        <title>Note: Detections that were only enabled/disabled will not also also show separately as modifications. Uses the _configtracker index since this is an on-premises deployment.</title>
         <search>
           <query>index=_configtracker component=ConfigChange data.path=*savedsearches.conf data.changes{}.properties{}.new_value=* $tab_detections_token$
 | rex field=data.path "apps\/(?&lt;app&gt;.*?)\/"
@@ -419,7 +458,6 @@ $tab_overview_token$
           <latest>$tokChangesTimeOP.latest$</latest>
         </search>
         <option name="drilldown">none</option>
-        <option name="refresh.display">progressbar</option>
         <format type="color" field="Action">
           <colorPalette type="map">{"Enabled":#1E6F52,"Disabled":#3C444D,"Modified":#CBA700}</colorPalette>
         </format>
@@ -564,11 +602,12 @@ $tab_overview_token$
           <latest>$tokNotablesTime.latest$</latest>
         </search>
         <option name="drilldown">none</option>
-        <option name="mitre_attck_heatmap.mitre_attck_heatmap.endVal">1</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.endVal">10</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.hideNull">yes</option>
-        <option name="mitre_attck_heatmap.mitre_attck_heatmap.legendTitle">Changes (0 = Disabled, 1 = Enabled)</option>
-        <option name="mitre_attck_heatmap.mitre_attck_heatmap.midColor">#22908D</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.legendTitle">Shows Overall Posture Change Trend</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.midColor">#CBA700</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.sortOrder">desc</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.startVal">-10</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.theme">dark</option>
         <option name="refresh.display">progressbar</option>
       </viz>
@@ -600,7 +639,7 @@ $tab_overview_token$
         <option name="drilldown">none</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.endVal">1</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.hideNull">yes</option>
-        <option name="mitre_attck_heatmap.mitre_attck_heatmap.legendTitle">Changes (0 = Disabled, 1 = Enabled)</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.legendTitle">Shows Overall Posture Change Trend</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.midColor">#22908D</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.sortOrder">desc</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.theme">dark</option>
@@ -668,15 +707,22 @@ $tab_overview_token$
           <query>$tab_scheduling_token$
 | eval category=if(match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]") , "Correlation Search", if(isnull(alert_threshold) OR alert_threshold == "", "Scheduled Search", "Alert"))
 | where disabled = 0 AND is_scheduled = 1 AND $tokSearchCategory$
-| eval Name = coalesce(action.correlationsearch.label,title)
+| eval Name = coalesce(action.correlationsearch.label, title)
 | eval search_type = if(match('dispatch.earliest_time',"rt"), "real-time", "scheduled")
 | eval schedule_type = if(realtime_schedule==1, "real-time scheduling", "continuous scheduling")
+| eventstats count as total
+| eventstats count by cron_schedule, total
+| eval percent = round(count/total * 100, 2)
 | eval issue1 = if(search_type = "real-time", "Performance intensive scheduling mode", null())
 | eval issue2 = if(disabled=0 AND is_scheduled = 0, "Enabled but not scheduled", null())
-| eval issues = coalesce(mvappend(issue1, issue2), "None")
-| table next_scheduled_time, eai:acl.app, category, Name, cron_schedule, schedule_priority, schedule_window, search_type, schedule_type, issues
+| eval issue3 = if(percent &gt; `max_search_grouping_percentage`, "Part of a CRON schedule that has a high percentage of total searches (" + percent + "%)", null())
+| eval issue4 = if(schedule_window = "0", "Consider using \"auto\" Schedule Windows", null())
+| eval issue5 = if(allow_skew = "0", "Consider setting an allow_skew value", null())
+| eval issues = coalesce(mvappend(issue1, issue2, issue3, issue4, issue5), "None")
+| eval issues_count = coalesce(mvcount(mvfilter(issues!="None")), 0)
+| table next_scheduled_time, eai:acl.app, category, Name, cron_schedule, schedule_priority, schedule_window, allow_skew, search_type, schedule_type, issues_count, issues
 | sort next_scheduled_time
-| rename eai:acl.app as App, next_scheduled_time as "Next Scheduled Time", category as Category, cron_schedule as "CRON Schedule", schedule_priority as "Schedule Priority", schedule_window as "Schedule Window", search_type as "Search Type", schedule_type as "Schedule Type", issues as "Potential Issues"</query>
+| rename eai:acl.app as App, next_scheduled_time as "Next Scheduled Time", category as Category, cron_schedule as "CRON Schedule", schedule_priority as "Schedule Priority", schedule_window as "Schedule Window", allow_skew as "Allow Skew", search_type as "Search Type", schedule_type as "Schedule Type", issues_count, as "Potential Issues", issues as "Issue Details"</query>
         </search>
         <option name="drilldown">none</option>
         <option name="refresh.display">progressbar</option>
@@ -694,6 +740,10 @@ $tab_overview_token$
         </format>
         <format type="color" field="Schedule Priority">
           <colorPalette type="map">{"default":#65778A,"higher":#CBA700,"highest":#9E2520}</colorPalette>
+        </format>
+        <format type="color" field="Potential Issues">
+          <colorPalette type="list">[#118832,#CBA700,#D94E17,#D41F1F,#9E2520]</colorPalette>
+          <scale type="threshold">1,2,3,4</scale>
         </format>
       </table>
     </panel>
@@ -724,14 +774,6 @@ $tab_overview_token$
     <panel>
       <title>Scheduled Searches Distribution</title>
       <chart>
-        <search base="baseDetectionsSearch">
-          <query>
-$tab_scheduling_token$
-| eval category=if(match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]") , "Correlation Search", if(isnull(alert_threshold) OR alert_threshold == "", "Scheduled Search", "Alert"))
-| where disabled = 0 AND is_scheduled = 1 AND $tokSearchCategory$
-| eval _time = strptime(next_scheduled_time, "%Y-%m-%d %H:%M:%S %Z")
-| timechart cont=false span=30s count as "Scheduled Searches" by category</query>
-        </search>
         <search base="baseDetectionsSearch" type="annotation">
           <query>
 $tab_scheduling_token$
@@ -743,6 +785,14 @@ $tab_scheduling_token$
 | eval annotation_label = "High number of total searches: " + count
 | eval annotation_category = "Warning"
           </query>
+        </search>
+        <search base="baseDetectionsSearch">
+          <query>
+$tab_scheduling_token$
+| eval category=if(match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]") , "Correlation Search", if(isnull(alert_threshold) OR alert_threshold == "", "Scheduled Search", "Alert"))
+| where disabled = 0 AND is_scheduled = 1 AND $tokSearchCategory$
+| eval _time = strptime(next_scheduled_time, "%Y-%m-%d %H:%M:%S %Z")
+| timechart cont=false span=30s count as "Scheduled Searches" by category</query>
         </search>
         <option name="charting.annotation.categoryColors">{"Warning":"#f96600"}</option>
         <option name="charting.chart">column</option>
