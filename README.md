@@ -232,7 +232,7 @@ The last panel on this tab gives you a visual overview of your scheduled searche
 
 ## Notes & Feedback
 
-I plan to keep on improving this add-on, for example by adding additional checks, reporting more potential issues, etc.
+I plan to keep on improving this add-on, for example by adding additional checks, reporting more potential issues, displaying scheduling bottlenecks in an even better manner, allowing updates to underlying configurations directly, etc.
 
 If you have feedback on this supporting add-on for Splunk ES (improvement ideas, issues, questions), feel free to contact me via email or open an issue on this project on GitHub.
 
