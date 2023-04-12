@@ -33,7 +33,7 @@ _Scheduling Details_
 
 - Added additional checks for potential issues
 
-**v1.0.2** - Released 2023-04-06
+**v1.0.2** - Released _TBD_
 
 _MITRE Att&ck Details_
 
