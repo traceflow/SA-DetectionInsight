@@ -442,7 +442,7 @@ $tab_overview_token$
         <initialValue>*</initialValue>
       </input>
       <table>
-        <title>Note: Detections that were only enabled/disabled will not also also show separately as modifications. Uses the _configtracker index since this is an on-premises deployment.</title>
+        <title>Note: Detections that were only enabled/disabled will not also show separately as modifications. Uses the _configtracker index since this is an on-premises deployment.</title>
         <search>
           <query>index=_configtracker component=ConfigChange data.path=*savedsearches.conf data.changes{}.properties{}.new_value=* $tab_detections_token$
 | rex field=data.path "apps\/(?&lt;app&gt;.*?)\/"
@@ -516,17 +516,70 @@ $tab_overview_token$
         <default>disabled=0</default>
         <initialValue>disabled=0</initialValue>
       </input>
-      <viz type="mitre_attck_heatmap.mitre_attck_heatmap" id="mitreHeatmap1">
-        <title>This shows how selected detections map to the MITRE Att&amp;ck Framework based on the technique they are meant to detect.</title>
+      <input type="multiselect" token="tokMITREProducts" searchWhenChanged="true">
+        <label>Included Products</label>
+        <choice value="*">ALL</choice>
+        <choice value="Splunk">Enterprise Security</choice>
+        <default>Splunk</default>
+        <initialValue>Splunk</initialValue>
+        <delimiter>, </delimiter>
+        <prefix>Product IN(</prefix>
+        <suffix>)</suffix>
+        <valuePrefix>"</valuePrefix>
+        <valueSuffix>"</valueSuffix>
+        <fieldForLabel>Product</fieldForLabel>
+        <fieldForValue>Product</fieldForValue>
+        <search>
+          <query>| inputlookup other_mitre_detections_by_product_lookup
+| stats count by Product
+| fields Product</query>
+        </search>
+      </input>
+      <input type="dropdown" token="tokMITREMatrix" searchWhenChanged="true">
+        <label>MITRE Matrix</label>
+        <choice value="enterprise::">Enterprise - All</choice>
+        <choice value="enterprise::Containers">Enterprise - Containers</choice>
+        <choice value="enterprise::Azure AD,Google Workspace,IaaS,Office 365,SaaS">Enterprise - Cloud - All</choice>
+        <choice value="enterprise::Azure AD">Enterprise - Cloud - AzureAd</choice>
+        <choice value="enterprise::Google Workspace">Enterprise - Cloud - Google Workspace</choice>
+        <choice value="enterprise::IaaS">Enterprise - Cloud - IaaS</choice>
+        <choice value="enterprise::Office 365">Enterprise - Cloud - Office 365</choice>
+        <choice value="enterprise::SaaS">Enterprise - Cloud - SaaS</choice>
+        <choice value="enterprise::Linux">Enterprise - Linux</choice>
+        <choice value="enterprise::macOS">Enterprise - macOS</choice>
+        <choice value="enterprise::Network">Enterprise - Network</choice>
+        <choice value="enterprise::PRE">Enterprise - PRE</choice>
+        <choice value="enterprise::Windows">Enterprise - Windows</choice>
+        <choice value="ics::">ICS - All</choice>
+        <choice value="mobile::">Mobile - All</choice>
+        <choice value="mobile::Android">Mobile - Android</choice>
+        <choice value="mobile::iOS">Mobile - iOS</choice>
+        <default>enterprise::</default>
+        <initialValue>enterprise::</initialValue>
+        <change>
+          <set token="tokMITREMatrixLabel">$label$</set>
+        </change>
+      </input>
+      <html>
+        <h2>Showing MITRE Matrix: $tokMITREMatrixLabel$</h2>
+      </html>
+      <viz id="mitreHeatmap1" type="mitre_attck_heatmap.mitre_attck_heatmap">
+        <title>This shows how selected detections map to the MITRE Att&amp;ck Framework based on the technique(s) they are meant to detect.  You can optionally select a specific Matrix.</title>
         <search base="baseDetectionsSearch">
           <query>$tab_mitre_token$
 | where $tokStatusMitre$ AND (match('action.correlationsearch', "1|[Tt]|[Tt][Rr][Uu][Ee]") OR match('action.notable', "1|[Tt]|[Tt][Rr][Uu][Ee]")) 
 | spath input=action.correlationsearch.annotations 
 | fields title mitre_attack{} 
+| eval Product = "Splunk"
 | rename title as Title, mitre_attack{} as Technique 
+| rex max_match=0 field=Technique "(?&lt;Technique&gt;T\d{4}(\.\d{3}|))"
+| append 
+    [| inputlookup other_mitre_detections_by_product_lookup 
+    | rex max_match=0 field=Technique "(?&lt;Technique&gt;T\d{4}(\.\d{3}|))"
+    | rename Detection as Title
+        ] 
 | mvexpand Technique 
-| search Technique=* AND Technique!="" 
-| eval Technique = replace(Technique, "([Tt]\d+)(\.\d+|)", "\1") 
+| search Technique=* AND Technique!="" AND $tokMITREProducts$
 | stats dc(Title) as "# of Detections" values(Title) as Detections by Technique</query>
         </search>
         <option name="drilldown">none</option>
@@ -534,6 +587,7 @@ $tab_overview_token$
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.endVal">5</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.hideNull">no</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.legendTitle">Enabled Security Detections</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.matrix">$tokMITREMatrix$</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.midColor">#22908D</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.sortOrder">desc</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.startColor">#0C1587</option>

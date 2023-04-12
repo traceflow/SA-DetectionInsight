@@ -33,6 +33,15 @@ _Scheduling Details_
 
 - Added additional checks for potential issues
 
+**v1.0.2** - Released 2023-04-06
+
+_MITRE Att&ck Details_
+
+- Added the ability to filter the MITRE visualization to a specific [MITRE Matrix](https://attack.mitre.org/matrices/)
+- The visualization now shows subtechniques as well
+
+Make sure to upgrade the prerequisite [MITRE ATTCK Heatmap visualisation](https://splunkbase.splunk.com/app/5742) to the latest version - 1.6.1 for this to work.
+
 
 ## Description
 
@@ -155,6 +164,11 @@ After refreshing the updated navigation should show your new collection and view
 
 Two additional lookups are provided with this add-on to add contextual descriptions as tooltips for CIS20 controls and NIST functions/categories.
 
+### Additional MITRE product detections
+
+Users can also **optionally** map MITRE detections from other products by adding the information to the `other_mitre_detections_by_product.csv` lookup file.
+A working example from ExtraHop is available under `lookups/contrib`.  Information added to this lookup will become available in the **MITRE Att&ck Details** tab if provided.
+
 ## What does it look like?
 
 The additional view provides the following insights arranged over multiple tabs on the same dashboard:
@@ -182,8 +196,10 @@ The **Detection Details** tab provides more information on selected Security Det
 - Their status (enabled/disabled)
 - Their related security domain
 - The main SPL Command used for the underlying search
+- If the detection uses Machine Learning or not
 - The adaptive actions used
 - The MITRE ATT&CK Technique(s) covered
+- Any potential issues
 
 ![Detection Details](readme/DetectionDetails.png)
 
@@ -197,10 +213,12 @@ This tab also shows any changes to Security Detection over the selected time win
 
 **Note:** The screenshot shown above is for **Splunk Enterprise**.  This feature is a little more limited when using Splunk Cloud at the moment due to the unavailability of the `_configTracker` internal index.  If this is a feature that would be valuable to you, I would encourage you to vote for it to be considered/added [here](https://ideas.splunk.com/ideas/PLECID-I-537).
 
-The **MITRE Att&ck Details** tab show you details around your detections and how they map to the MITRE Att&ck security framework.  You'll see:
+The **MITRE Att&ck Details** tab show you details around your detections and how they map to the MITRE Att&ck security framework.  You can optionally view different versions of the MITRE matrices (Enterprise, ICS, Mobile, Containers, etc.).
+You'll be presented with:
 
 - Your current detection coverage
 - The additional coverage available but currently not in use
+- Coverage for other external solutions, if provided (see the `Lookups` section)
 
 ![Detection Coverage MITRE](readme/DetectionCoverageMITRE.png)
 
@@ -241,6 +259,8 @@ This add-on was run through [AppInspect](https://dev.splunk.com/enterprise/docs/
 ## Credits
 
 > Thanks to people who provided initial feedback on this add-on.  You know who you are!
+
+> Many thanks to [Mohammed Latif](https://github.com/alatif113) for the amazing MITRE Heat Map Visualization.
 
 > Modal dialog code from the awesome [Splunk Dev for All](https://splunkbase.splunk.com/app/4104) app by current and former Splunkers. 
 
