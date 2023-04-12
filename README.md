@@ -39,6 +39,7 @@ _MITRE Att&ck Details_
 
 - Added the ability to filter the MITRE visualization to a specific [MITRE Matrix](https://attack.mitre.org/matrices/)
 - The visualization now shows subtechniques as well
+- Added the ability to show MITRE coverage for external products, see the `lookups` section below for details
 
 Make sure to upgrade the prerequisite [MITRE ATTCK Heatmap visualisation](https://splunkbase.splunk.com/app/5742) to the latest version - 1.6.1 for this to work.
 
