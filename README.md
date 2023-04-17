@@ -17,6 +17,8 @@
 
 **v1.0.1** - Released 2023-03-24
 
+**v1.0.2** - _Coming soon_
+
 _Overview_
 
 - Added the ability to add checks based on unmanaged annotations, for example to map Atomic Red Team Test GUID(s) to detections
