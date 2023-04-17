@@ -1,0 +1,336 @@
+Product,Detection,Additional_Information,Technique
+ExtraHop,Alias Member Enumeration,msrpc_alias_member_enum,"T1069: Permission Groups Discovery, T1087: Account Discovery"
+ExtraHop,All Object Enumeration,ldap_object_enum,T1087: Account Discovery
+ExtraHop,Anonymous FTP Auth Enabled,anonymous_ftp,"T1078: Valid Accounts, T1105: Ingress Tool Transfer"
+ExtraHop,Anonymous FTP Authentication Enabled,anonymous_ftp_individual,"T1078: Valid Accounts, T1105: Ingress Tool Transfer"
+ExtraHop,Apache HTTP Server Path Traversal Exploit,apache_http_server_path_traversal,T1083: File and Directory Discovery
+ExtraHop,Apache Struts 2 Exploit Attempt,apache_struts2_exploit_attempt,T1190: Exploit Public-Facing Application
+ExtraHop,Apache Tomcat JSP Exploit Attempt,tomcat_jsp_upload,T1210: Exploitation of Remote Services
+ExtraHop,AS-REP Roasting Activity,ldap_as_rep_activity,T1558: Steal or Forge Kerberos Tickets
+ExtraHop,AWS Cloud Service Enumeration,aws_services_enumeration,T1526: Cloud Service Discovery
+ExtraHop,AWS Instance Metadata Service (IMDS) Proxy,aws_imds_proxying,T1552: Unsecured Credentials
+ExtraHop,BloodHound Enumeration Activity,bloodhound_enumeration_activity,"T1018: Remote System Discovery, T1033: System Owner/User Discovery, T1059: Command and Scripting Interpreter, T1069: Permission Groups Discovery, T1087: Account Discovery, T1106: Native API, T1201: Password Policy Discovery, T1482: Domain Trust Discovery, T1560: Archive Collected Data"
+ExtraHop,Cisco CDP Exploit Attempt,cisco_cdp_vulnerabilities,T1210: Exploitation of Remote Services
+ExtraHop,Cobalt Strike C&C HTTP Connection,cobalt_strike_c2_http,T1071: Application Layer Protocol
+ExtraHop,Cobalt Strike C&C SSL/TLS Connection,cobalt_strike_c2_tls,T1071: Application Layer Protocol
+ExtraHop,Cobalt Strike DNS Beaconing,cobalt_strike_c2_dns,T1071: Application Layer Protocol
+ExtraHop,Command-and-Control Beaconing,c2_web_beaconing,"T1001: Data Obfuscation, T1008: Fallback Channels, T1029: Scheduled Transfer, T1102: Web Service, T1104: Multi-Stage Channels, T1132: Data Encoding, T1176: Browser Extensions, T1205: Traffic Signaling, T1571: Non-Standard Port, T1573: Encrypted Channel"
+ExtraHop,Confirmed OnePercent Group Ransomware IOC,onepercent_ml,"T1041: Exfiltration Over C2 Channel, T1071: Application Layer Protocol, T1486: Data Encrypted for Impact, T1573: Encrypted Channel"
+ExtraHop,Cross-Site Scripting (XSS) Attack,xss_attack,T1203: Exploitation for Client Execution
+ExtraHop,Cryptocurrency Mining,cryptocurrency_mining,T1496: Resource Hijacking
+ExtraHop,CVE-2017-12635 Apache CouchDB Exploit Attempt,cve_2017_12635,"T1068: Exploitation for Privilege Escalation, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2018-1111 Red Hat DHCP Exploit Attempt,cve_2018_1111,"T1203: Exploitation for Client Execution, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2018-13379 Fortinet FortiOS Exploit,cve_2018_13379,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services, T1212: Exploitation for Credential Access, T1552: Unsecured Credentials, T1555: Credentials from Password Stores"
+ExtraHop,CVE-2018-15961 Adobe ColdFusion Exploit Attempt,cve_2018_15961,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2019-0193 Apache Solr Exploit Attempt,cve_2019_0193,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2019-0604 Microsoft SharePoint Exploit Attempt,cve_2019_0604,"T1190: Exploit Public-Facing Application, T1505: Server Software Component"
+ExtraHop,CVE-2019-0708 RDP Exploit Attempt,cve_2019_0708,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2019-10149 Exim Exploit Attempt,cve_2019_10149,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2019-11510 Pulse Connect Secure Exploit Attempt,cve_2019_11510,"T1003: OS Credential Dumping, T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2019-11580 Atlassian Crowd Exploit,cve_2019_11580,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2019-15846 Exim Exploit Attempt,cve_2019_15846,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2019-17558 Apache Solr Exploit,cve_2019_17558,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2019-19781 Citrix ADC and Gateway Exploit,cve_2019_19781_exploit,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2019-19781 Citrix ADC and Gateway Scan,cve_2019_19781_scan,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2019-8394 Zoho ManageEngine Exploit Attempt,cve_2019_8394,"T1210: Exploitation of Remote Services, T1505: Server Software Component"
+ExtraHop,CVE-2019-9670 Synacor Zimbra Collaboration Suite Exploit Attempt,cve_2019_9670,"T1190: Exploit Public-Facing Application, T1212: Exploitation for Credential Access"
+ExtraHop,CVE-2020-0601 Windows CryptoAPI ECC Validation Vulnerability,cve_2020_0601,T1557: Man-in-the-Middle
+ExtraHop,CVE-2020-0796 Windows 10 SMBv3 Exploit Attempt,cve_2020_0796,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2020-10189 Zoho ManageEngine Exploit,cve_2020_10189,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2020-11651 Salt Exploit Attempt,cve_2020_11651,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services, T1212: Exploitation for Credential Access"
+ExtraHop,CVE-2020-11901 Ripple20 Exploit Attempt,ripple20_dns_rce,"T1203: Exploitation for Client Execution, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2020-12695 UPnP Exploit Attempt,cve_2020_12695,"T1046: Network Service Scanning, T1048: Exfiltration Over Alternative Protocol, T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services, T1498: Network Denial of Service"
+ExtraHop,CVE-2020-1301 SMBv1 Exploit,cve_2020_1301,"T1068: Exploitation for Privilege Escalation, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2020-1350 SIGRed Exploit Attempt,cve_2020_1350,"T1203: Exploitation for Client Execution, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2020-1472 Zerologon Exploit Attempt,cve_2020_1472_exploit,"T1068: Exploitation for Privilege Escalation, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2020-1472 Zerologon Scan,cve_2020_1472,"T1068: Exploitation for Privilege Escalation, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2020-15505 MobileIron Core and Connector Exploit Attempt,cve_2020_15505,T1190: Exploit Public-Facing Application
+ExtraHop,CVE-2020-16898 Windows TCP/IP Stack Exploit Attempt,cve_2020_16898,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2020-16899 Windows TCP/IP Stack Exploit Attempt,cve_2020_16899,"T1210: Exploitation of Remote Services, T1499: Endpoint Denial of Service"
+ExtraHop,CVE-2020-17051 Windows NFS Exploit Attempt,cve_2020_17051,"T1135: Network Share Discovery, T1529: System Shutdown/Reboot"
+ExtraHop,CVE-2020-1938 Ghostcat Exploit,cve_2020_1938,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2020-25577 FreeBSD Exploit Attempt,cve_2020_25577,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2020-25583 FreeBSD Exploit Attempt,cve_2020_25583,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2020-3952 VMware vCenter Exploit,cve_2020_3952,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2020-5902 F5 BIG-IP Exploit,cve_2020_5902,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2020-6207 SAP Solution Manager Exploit Attempt,cve_2020_6207,"T1018: Remote System Discovery, T1068: Exploitation for Privilege Escalation, T1127: Trusted Developer Utilities Proxy Execution, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2020-6287 SAP RECON Vulnerability,cve_2020_6287,"T1133: External Remote Services, T1136: Create Account, T1190: Exploit Public-Facing Application"
+ExtraHop,CVE-2020-7247 OpenSMTPD Exploit,cve_2020_7247,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2021-1497 Cisco HyperFlex HX Exploit Attempt,cve_2021_1497,"T1059: Command and Scripting Interpreter, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2021-1498 Cisco HyperFlex HX Exploit Attempt,cve_2021_1498,"T1059: Command and Scripting Interpreter, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2021-21972 VMware vCenter Exploit,cve_2021_21972_exploit,"T1210: Exploitation of Remote Services, T1505: Server Software Component"
+ExtraHop,CVE-2021-21972 VMware vCenter Scan,cve_2021_21972_scan,T1046: Network Service Scanning
+ExtraHop,CVE-2021-21974 VMware ESXi OpenSLP Exploit Attempt,cve_2021_21974,"T1046: Network Service Scanning, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2021-21985 VMware vCenter Exploit,cve_2021_21985,"T1068: Exploitation for Privilege Escalation, T1210: Exploitation of Remote Services, T1505: Server Software Component"
+ExtraHop,CVE-2021-22005 VMware vCenter Exploit,cve_2021_22005,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2021-22006 VMware vCenter Exploit,cve_2021_22006,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2021-22205 GitLab CE and EE Exploit Attempt,cve_2021_22205,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2021-22893 Pulse Connect Secure Exploit Attempt,cve_2021_22893,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2021-22986 F5 BIG-IP and BIG-IQ Exploit,cve_2021_22986,"T1059: Command and Scripting Interpreter, T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2021-22991 F5 BIG-IP Exploit,cve_2021_22991,"T1005: Data from Local System, T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services, T1499: Endpoint Denial of Service, T1529: System Shutdown/Reboot"
+ExtraHop,CVE-2021-26084 Atlassian Confluence Exploit Attempt,cve_2021_26084,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2021-26432 Windows NFS ONCRPC Exploit Attempt,cve_2021_26432,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2021-26877 Windows DNS Server Exploit Attempt,cve_2021_26877,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2021-26897 Windows DNS Server Exploit Attempt,cve_2021_26897,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2021-28324 Windows 10 SMBv3 Exploit,cve_2021_28324,T1133: External Remote Services
+ExtraHop,CVE-2021-31166 Windows HTTP Stack Exploit Attempt,cve_2021_31166,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2021-31181 Microsoft SharePoint Exploit Attempt,cve_2021_31181,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services, T1212: Exploitation for Credential Access, T1213: Data from Information Repositories"
+ExtraHop,CVE-2021-34467 Microsoft SharePoint Exploit Attempt,cve_2021_34467,"T1505: Server Software Component, T1546: Event Triggered Execution"
+ExtraHop,CVE-2021-34473 Microsoft Exchange Server Exploit,cve_2021_34473,"T1068: Exploitation for Privilege Escalation, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2021-34527 Windows Print Spooler Exploit Attempt,cve_2021_34527,"T1068: Exploitation for Privilege Escalation, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2021-35394 Realtek SDK Exploit Attempt,cve_2021_35394,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2021-35395 Realtek SDK Exploit Attempt,cve_2021_35395,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2021-38647 OMIGOD Exploit,cve_2021_38647,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2021-42321 Microsoft Exchange Exploit Attempt,cve_2021_42321,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2021-43798 Grafana Exploit Attempt,cve_2021_43798,T1190: Exploit Public-Facing Application
+ExtraHop,CVE-2021-44077 Zoho ManageEngine Exploit Attempt,cve_2021_44077,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2022-0543 Redis Exploit,cve_2022_0543,"T1059: Command and Scripting Interpreter, T1068: Exploitation for Privilege Escalation, T1210: Exploitation of Remote Services, T1211: Exploitation for Defense Evasion"
+ExtraHop,CVE-2022-1388 F5 BIG-IP Exploit,cve_2022_1388,"T1059: Command and Scripting Interpreter, T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2022-21907 Windows HTTP Stack Exploit Attempt,cve_2022_21907,"T1210: Exploitation of Remote Services, T1499: Endpoint Denial of Service"
+ExtraHop,CVE-2022-22947 Spring Cloud Gateway Exploit Attempt,cve_2022_22947,T1190: Exploit Public-Facing Application
+ExtraHop,CVE-2022-22954 VMware Workspace ONE Access and Identity Manager Exploit Attempt,cve_2022_22954,T1210: Exploitation of Remote Services
+ExtraHop,CVE-2022-22963 Spring Cloud Function Exploit Attempt,cve_2022_22963,T1190: Exploit Public-Facing Application
+ExtraHop,CVE-2022-22965 Spring4Shell Exploit Attempt,spring4shell,T1190: Exploit Public-Facing Application
+ExtraHop,CVE-2022-26134 Atlassian Confluence Exploit,cve_2022_26134,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,CVE-2022-26923 Active Directory Domain Services Exploit Attempt,cve_2022_26923,"T1068: Exploitation for Privilege Escalation, T1078: Valid Accounts, T1550: Use Alternate Authentication Material"
+ExtraHop,CVE-2022-30190 Follina Exploit Attempt,cve_2022_30190,"T1203: Exploitation for Client Execution, T1204: User Execution"
+ExtraHop,Data Exfiltration,data_exfiltration,"T1011: Exfiltration Over Other Network Medium, T1020: Automated Exfiltration, T1029: Scheduled Transfer, T1030: Data Transfer Size Limits, T1041: Exfiltration Over C2 Channel, T1048: Exfiltration Over Alternative Protocol, T1567: Exfiltration Over Web Service"
+ExtraHop,Data Exfiltration to S3 Bucket,abnormal_s3_upload,"T1537: Transfer Data to Cloud Account, T1567: Exfiltration Over Web Service"
+ExtraHop,Data Exfiltration to Unknown S3 Bucket,unknown_s3_bucket_upload,"T1537: Transfer Data to Cloud Account, T1567: Exfiltration Over Web Service"
+ExtraHop,Database Brute Force,database_brute_force,T1110: Brute Force
+ExtraHop,Database Data Staging,abnormally_large_database_response,"T1048: Exfiltration Over Alternative Protocol, T1114: Email Collection"
+ExtraHop,Database Enumeration,database_enumeration,T1213: Data from Information Repositories
+ExtraHop,Database Takeover Attack,database_takeover,T1569: System Services
+ExtraHop,Database Transaction Failures,database_transaction_failures,T1110: Brute Force
+ExtraHop,DCOM Remote Command Launch,dcom_lateral_movement,T1021: Remote Services
+ExtraHop,DCShadow Attack,dcshadow,T1207: Rogue Domain Controller
+ExtraHop,DCSync Attack,dcsync,T1003: OS Credential Dumping
+ExtraHop,Delayed Citrix Data Transfer,delayed_citrix_data_transfer,T1498: Network Denial of Service
+ExtraHop,Delayed Data Transfer,delayed_data_transfer,T1498: Network Denial of Service
+ExtraHop,Delayed Database Data Transfer,delayed_database_data_transfer,T1498: Network Denial of Service
+ExtraHop,Delayed Email Data Transfer,delayed_email_data_transfer,T1498: Network Denial of Service
+ExtraHop,Delayed HTTP Data Transfer,delayed_http_data_transfer,T1498: Network Denial of Service
+ExtraHop,Delayed Kerberos Data Transfer,delayed_kerberos_data_transfer,T1498: Network Denial of Service
+ExtraHop,Delayed LDAP Data Transfer,delayed_ldap_data_transfer,T1498: Network Denial of Service
+ExtraHop,Delayed Memcache Data Transfer,delayed_memcache_data_transfer,T1498: Network Denial of Service
+ExtraHop,Delayed Redis Data Transfer,delayed_redis_data_transfer,T1498: Network Denial of Service
+ExtraHop,DGA Domain Queries,domain_generation_algorithm_unresolved,T1568: Dynamic Resolution
+ExtraHop,DGA Domain Resolution,domain_generation_algorithm_resolved,T1568: Dynamic Resolution
+ExtraHop,DNS Brute Force,dns_brute_force,T1018: Remote System Discovery
+ExtraHop,DNS Internal Reverse Lookup Scan,dns_internal_reverse_lookup_scan,T1018: Remote System Discovery
+ExtraHop,DNS Request for a Cryptocurrency Mining Pool,cryptomining_pool_dns_request,T1496: Resource Hijacking
+ExtraHop,DNS Request Timeouts,dns_request_timeouts,"T1498: Network Denial of Service, T1499: Endpoint Denial of Service"
+ExtraHop,DNS Request to a Suspicious Host,ti_dns_host,"T1189: Drive-by Compromise, T1566: Phishing"
+ExtraHop,DNS Timeouts,dns_timeouts,"T1498: Network Denial of Service, T1499: Endpoint Denial of Service"
+ExtraHop,DNS Tunnel,dns_tunnel,"T1030: Data Transfer Size Limits, T1048: Exfiltration Over Alternative Protocol"
+ExtraHop,DNS Zone Transfer,dns_zone_transfer,T1016: System Network Configuration Discovery
+ExtraHop,Domain Admin Enumeration,samr_domain_admin_enum,T1087: Account Discovery
+ExtraHop,Domain Controller Enumeration,msrpc_domain_controller_enumeration,T1018: Remote System Discovery
+ExtraHop,Domain Fronting,domain_fronting,T1090: Proxy
+ExtraHop,Domain Generation Algorithm,domain_generation_algorithm,T1568: Dynamic Resolution
+ExtraHop,Domain Group Enumeration,samr_domain_group_enum,T1069: Permission Groups Discovery
+ExtraHop,Domain Trust Enumeration,domain_trust_enumeration,T1482: Domain Trust Discovery
+ExtraHop,Domain Trusts Enumeration,domain_trusts_enumeration,T1482: Domain Trust Discovery
+ExtraHop,Domain User Enumeration,samr_domain_user_enum,T1087: Account Discovery
+ExtraHop,Domain Workstation Enumeration,ldap_all_workstation_enum,T1018: Remote System Discovery
+ExtraHop,Domain Workstation Enumeration,samr_domain_computer_enum,T1018: Remote System Discovery
+ExtraHop,Domain Workstation Enumeration,samr_domain_workstation_enum,T1018: Remote System Discovery
+ExtraHop,DoublePulsar RDP Implant,doublepulsar_rdp_implant,"T1001: Data Obfuscation, T1071: Application Layer Protocol, T1105: Ingress Tool Transfer, T1132: Data Encoding, T1573: Encrypted Channel"
+ExtraHop,DoublePulsar RDP Scan,doublepulsar_rdp_scan,T1046: Network Service Scanning
+ExtraHop,DoublePulsar SMB/CIFS Implant Activity,doublepulsar_smb_implant,"T1001: Data Obfuscation, T1071: Application Layer Protocol, T1105: Ingress Tool Transfer, T1132: Data Encoding, T1573: Encrypted Channel"
+ExtraHop,DoublePulsar SMB/CIFS Scan,doublepulsar_smb_scan,T1046: Network Service Scanning
+ExtraHop,Drupal Exploit Attempt,cve_2018_7600,T1190: Exploit Public-Facing Application
+ExtraHop,Empire C&C HTTP Connection,empire_c2_http,T1071: Application Layer Protocol
+ExtraHop,Empire C&C SSL/TLS Connection,empire_c2_tls,T1071: Application Layer Protocol
+ExtraHop,EternalBlue Exploit,eternalblue_exploit,T1210: Exploitation of Remote Services
+ExtraHop,File Transfer to Windows Autostart Path,smb_autostart_path,"T1021: Remote Services, T1547: Boot or Logon Autostart Execution, T1570: Lateral Tool Transfer"
+ExtraHop,FTP Brute Force,ftp_brute_force,T1110: Brute Force
+ExtraHop,FTP Brute Force with Successful Login,ftp_brute_force_success_login,T1110: Brute Force
+ExtraHop,FTP Data Staging,suspicious_ftp_data_reads,"T1039: Data from Network Shared Drive, T1114: Email Collection"
+ExtraHop,FTP Not Logged in Error,ftp_not_logged_in_error,T1110: Brute Force
+ExtraHop,Group Member Enumeration,msrpc_group_member_enum,T1069: Permission Groups Discovery
+ExtraHop,Group Policy Preferences (GPP) Password Enumeration,gpp_password_enumeration,T1552: Unsecured Credentials
+ExtraHop,HTTP Desync Attack,http_desync_attack,T1210: Exploitation of Remote Services
+ExtraHop,HTTP Gateway Timeout Error,http_gateway_timeout_error,"T1498: Network Denial of Service, T1499: Endpoint Denial of Service"
+ExtraHop,HTTP Request to a Suspicious Host,ti_http_host,"T1041: Exfiltration Over C2 Channel, T1189: Drive-by Compromise, T1566: Phishing, T1573: Encrypted Channel"
+ExtraHop,HTTP Request to a Suspicious URI,ti_http_uri,"T1189: Drive-by Compromise, T1566: Phishing"
+ExtraHop,HTTP Tunnel,potential_covert_channel,T1001: Data Obfuscation
+ExtraHop,ICMP Tunnel,icmp_tunnel,T1095: Non-Application Layer Protocol
+ExtraHop,Impacket SMBExec Activity,impacket_smbexec,"T1021: Remote Services, T1569: System Services"
+ExtraHop,Impacket WMIExec Activity,impacket_wmiexec,"T1021: Remote Services, T1047: Windows Management Instrumentation"
+ExtraHop,Inbound Connection from a Cobalt Strike IP Address,inbound_cobalt_strike_connection,T1071: Application Layer Protocol
+ExtraHop,Inbound Connection from a Cobalt Strike IP Address,inbound_cobalt_strike_connection_individual,T1071: Application Layer Protocol
+ExtraHop,Inbound Connection from a Tor Node,inbound_tor_connection_individual,T1090: Proxy
+ExtraHop,Inbound Tor Node Connections,inbound_tor_connection,T1090: Proxy
+ExtraHop,Interrupted Citrix Data Transfer,interrupted_citrix_data_transfer,T1498: Network Denial of Service
+ExtraHop,Kaseya VSA Activity,kaseya_vsa,"T1195: Supply Chain Compromise, T1486: Data Encrypted for Impact, T1490: Inhibit System Recovery"
+ExtraHop,Kerberos Attack Tool Activity,kerberos_attack_tool_activity,"T1021: Remote Services, T1078: Valid Accounts, T1550: Use Alternate Authentication Material"
+ExtraHop,Kerberos Brute Force,kerberos_brute_force,T1110: Brute Force
+ExtraHop,Kerberos Golden Ticket Attack,kerberos_golden_ticket_attack,"T1078: Valid Accounts, T1550: Use Alternate Authentication Material, T1558: Steal or Forge Kerberos Tickets"
+ExtraHop,Kerberos Revoked Credentials Errors,kerberos_revoked_credentials_errors,"T1110: Brute Force, T1531: Account Access Removal"
+ExtraHop,Kerberos Silver Ticket Attack,kerberos_silver_ticket_attack,"T1078: Valid Accounts, T1550: Use Alternate Authentication Material, T1558: Steal or Forge Kerberos Tickets"
+ExtraHop,Kerberos User Enumeration,kerberos_user_enumeration,T1087: Account Discovery
+ExtraHop,Kerberos Wrong Password Errors,kerberos_wrong_password_errors,"T1110: Brute Force, T1531: Account Access Removal"
+ExtraHop,LDAP Computer Enumeration,ldap_computer_enum,T1018: Remote System Discovery
+ExtraHop,LDAP GPO Enumeration,ldap_gpo_enumeration,T1615: Group Policy Discovery
+ExtraHop,LDAP Invalid Credentials Error,ldap_invalid_credentials_error,"T1110: Brute Force, T1531: Account Access Removal"
+ExtraHop,LDAP SPN Scan,ldap_spn_scan,T1087: Account Discovery
+ExtraHop,LDAP Wildcard Query,ldap_client_any_attribute_enum,T1087: Account Discovery
+ExtraHop,LLMNR Poisoning,llmnr_poisoning,T1557: Man-in-the-Middle
+ExtraHop,Local Admin Enumeration,samr_local_admin_enum,T1069: Permission Groups Discovery
+ExtraHop,Local User Enumeration,samr_local_user_enum,T1087: Account Discovery
+ExtraHop,Log4Shell JNDI Injection Attempt,cve_2021_44228_jndi_injection_attempt,T1190: Exploit Public-Facing Application
+ExtraHop,Logged-On User Enumeration,msrpc_loggedon_user_enum,T1033: System Owner/User Discovery
+ExtraHop,Metasploit C&C SSL/TLS Connection,msf_cert,"T1071: Application Layer Protocol, T1572: Protocol Tunneling"
+ExtraHop,Meterpreter C&C Session,meterpreter_shell,"T1071: Application Layer Protocol, T1572: Protocol Tunneling"
+ExtraHop,Microsoft Exchange Server SSRF and RCE Exploit,ms_exchange_ssrf_rce,"T1068: Exploitation for Privilege Escalation, T1078: Valid Accounts, T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services, T1505: Server Software Component"
+ExtraHop,Multiple Email Errors,multiple_email_errors,T1566: Phishing
+ExtraHop,Multiple Kerberos Authentication Errors,multiple_kerberos_auth_errors,T1110: Brute Force
+ExtraHop,Multiple LDAP Auth Errors,multiple_ldap_auth_errors,T1110: Brute Force
+ExtraHop,NBT-NS Poisoning,nbt_ns_poisoning,T1557: Man-in-the-Middle
+ExtraHop,Network Privilege Escalation,network_privilege_escalation,T1021: Remote Services
+ExtraHop,Network Share Enumeration,msrpc_network_share_enum,T1135: Network Share Discovery
+ExtraHop,New Active Directory Web Service (ADWS) Activity,new_adws_activity,T1021: Remote Services
+ExtraHop,New DHCP Activity,new_dhcp_activity,T1557: Man-in-the-Middle
+ExtraHop,New DNS over HTTPS (DoH) Activity,new_doh_activity,T1573: Encrypted Channel
+ExtraHop,New External IoT Connection,new_iot_connection,T1041: Exfiltration Over C2 Channel
+ExtraHop,New External LDAP Connection,new_external_ldap_connection,"T1040: Network Sniffing, T1041: Exfiltration Over C2 Channel, T1048: Exfiltration Over Alternative Protocol, T1071: Application Layer Protocol"
+ExtraHop,New External NFS Connection,new_external_nfs_connection,T1201: Password Policy Discovery
+ExtraHop,New External RDP Connection,new_external_rdp_connection,T1219: Remote Access Software
+ExtraHop,New External SSH Connection,new_external_ssh_connection,T1219: Remote Access Software
+ExtraHop,New Outbound SOCKS Connection,outbound_socks_connection,T1090: Proxy
+ExtraHop,New Printer Driver Installation Request,add_printer_driver,"T1068: Exploitation for Privilege Escalation, T1210: Exploitation of Remote Services"
+ExtraHop,New SMB/CIFS Executable File Transfer,new_smb_cifs_file_transfer,"T1080: Taint Shared Content, T1570: Lateral Tool Transfer"
+ExtraHop,New SSH Device,external_ssh_new_device,"T1021: Remote Services, T1200: Hardware Additions"
+ExtraHop,New WMI Enumeration Query,wmi_enumeration_query,"T1047: Windows Management Instrumentation, T1082: System Information Discovery"
+ExtraHop,New WMI Method Launch,wmi_activity,"T1021: Remote Services, T1047: Windows Management Instrumentation, T1210: Exploitation of Remote Services"
+ExtraHop,New WMI Process Creation,wmi_create_process,"T1021: Remote Services, T1047: Windows Management Instrumentation, T1210: Exploitation of Remote Services"
+ExtraHop,New WSMan Remote Administration Activity,new_wsman_remote_administration_activity,"T1059: Command and Scripting Interpreter, T1569: System Services"
+ExtraHop,NFS Data Staging,suspicious_nfs_data_reads,"T1039: Data from Network Shared Drive, T1114: Email Collection"
+ExtraHop,Non-standard HTTP Port,suspicious_http_port,T1571: Non-Standard Port
+ExtraHop,NTLM Relay Attack,ntlm_relay,T1557: Man-in-the-Middle
+ExtraHop,NTLMv1 Authentication,ntlmv1_authentication,T1557: Man-in-the-Middle
+ExtraHop,NTLMv1 Authentication,ntlmv1_authentication_individual,T1557: Man-in-the-Middle
+ExtraHop,Oracle WebLogic Administration Console Exploit Attempt,weblogic_admin_console_handle_rce,T1190: Exploit Public-Facing Application
+ExtraHop,Oracle WebLogic Deserialization Exploit Attempt,weblogic_xml_deserialization,"T1190: Exploit Public-Facing Application, T1210: Exploitation of Remote Services"
+ExtraHop,Oracle WebLogic Exploit,cve_2019_2725,T1556: Modify Authentication Process
+ExtraHop,Outbound Connection to a Cobalt Strike IP Address,outbound_cobalt_strike_connection,T1071: Application Layer Protocol
+ExtraHop,Outbound Connection to a Tor Node,outbound_tor_connection,T1090: Proxy
+ExtraHop,Outbound Log4Shell Activity,cve_2021_44228_outbound_activity,T1190: Exploit Public-Facing Application
+ExtraHop,Outbound SSH Traffic to an Unusual Location,ssh_unusual_location_c2,T1021: Remote Services
+ExtraHop,Overlapping IP Fragmentation,excessive_ip_fragmentation,T1562: Impair Defenses
+ExtraHop,Overwhelmed Citrix Data Transfer,overwhelmed_citrix_data_transfer,T1499: Endpoint Denial of Service
+ExtraHop,Overwhelmed Data Transfer,overwhelmed_data_transfer,T1499: Endpoint Denial of Service
+ExtraHop,Overwhelmed Database Data Transfer,overwhelmed_database_data_transfer,T1499: Endpoint Denial of Service
+ExtraHop,Overwhelmed Email Data Transfer,overwhelmed_email_data_transfer,T1499: Endpoint Denial of Service
+ExtraHop,Overwhelmed FTP Data Transfer,overwhelmed_ftp_data_transfer,T1499: Endpoint Denial of Service
+ExtraHop,Overwhelmed HTTP Data Transfer,overwhelmed_http_data_transfer,T1499: Endpoint Denial of Service
+ExtraHop,Overwhelmed Kerberos Data Transfer,overwhelmed_kerberos_data_transfer,T1499: Endpoint Denial of Service
+ExtraHop,Overwhelmed LDAP Data Transfer,overwhelmed_ldap_data_transfer,T1499: Endpoint Denial of Service
+ExtraHop,Overwhelmed Memcache Data Transfer,overwhelmed_memcache_data_transfer,T1499: Endpoint Denial of Service
+ExtraHop,Overwhelmed Redis Data Transfer,overwhelmed_redis_data_transfer,T1499: Endpoint Denial of Service
+ExtraHop,Past Connection to a New Suspicious Domain,retrospective_ti_domain_connection,"T1041: Exfiltration Over C2 Channel, T1189: Drive-by Compromise, T1566: Phishing, T1573: Encrypted Channel"
+ExtraHop,Past Connection to a New Suspicious IP Address,retrospective_ti_ip_address_connection,"T1041: Exfiltration Over C2 Channel, T1189: Drive-by Compromise, T1566: Phishing, T1573: Encrypted Channel"
+ExtraHop,Ping Scan,ping_scan,T1018: Remote System Discovery
+ExtraHop,PoshC2 HTTP Connection,poshc2_http,T1071: Application Layer Protocol
+ExtraHop,PoshC2 SSL/TLS Connection,poshc2_tls,T1071: Application Layer Protocol
+ExtraHop,PowerShell Remoting Activity,wsman_activity,T1021: Remote Services
+ExtraHop,Ransomware Activity,ransomware_activity,T1486: Data Encrypted for Impact
+ExtraHop,Rare Database Table Access,rare_database_table_access,T1213: Data from Information Repositories
+ExtraHop,Rare SSH Port,rare_ssh_port,"T1021: Remote Services, T1571: Non-Standard Port"
+ExtraHop,RDP Attack Tool Activity,suspicious_rdp_client,T1110: Brute Force
+ExtraHop,RDP Brute Force,rdp_brute_force,T1110: Brute Force
+ExtraHop,RDP Session Enumeration,msrpc_rdp_session_enum,"T1018: Remote System Discovery, T1021: Remote Services, T1049: System Network Connections Discovery"
+ExtraHop,Redline Stealer HTTP Activity,redline_stealer_http,"T1041: Exfiltration Over C2 Channel, T1071: Application Layer Protocol"
+ExtraHop,Remote Control SSH Traffic,interactive_traffic_ssh,"T1008: Fallback Channels, T1104: Multi-Stage Channels, T1205: Traffic Signaling, T1219: Remote Access Software, T1572: Protocol Tunneling, T1573: Encrypted Channel"
+ExtraHop,Remote Log Deletion,rpc_log_deletion_srv,T1070: Indicator Removal on Host
+ExtraHop,Remote Registry Modification,remote_reg_setvalue,"T1037: Boot or Logon Initialization Scripts, T1112: Modify Registry, T1543: Create or Modify System Process, T1546: Event Triggered Execution, T1547: Boot or Logon Autostart Execution, T1562: Impair Defenses"
+ExtraHop,Remote Service Launch,psexec_activity,"T1210: Exploitation of Remote Services, T1569: System Services"
+ExtraHop,Remote System Shutdown,rpc_remote_shutdown,T1529: System Shutdown/Reboot
+ExtraHop,Request to External LDAP Server,external_ldap_req,"T1040: Network Sniffing, T1041: Exfiltration Over C2 Channel, T1048: Exfiltration Over Alternative Protocol, T1071: Application Layer Protocol"
+ExtraHop,Request to External NFS Server,external_nfs_req,T1204: User Execution
+ExtraHop,REvil Suspicious Connection (Kaseya Supply Chain),kaseya_ml_ip,"T1195: Supply Chain Compromise, T1486: Data Encrypted for Impact, T1490: Inhibit System Recovery"
+ExtraHop,Ripple20 ICMP Scan,ripple20_icmp_scan,"T1018: Remote System Discovery, T1046: Network Service Scanning"
+ExtraHop,Ripple20 IP in IP Exploit Attempt,ripple20_ip_in_ip,T1574: Hijack Execution Flow
+ExtraHop,Ripple20 IP in IP Exploit Attempt,ripple20_ip_in_ip_ipaddr,T1574: Hijack Execution Flow
+ExtraHop,Scheduled Task Activity (ATSVC),msrpc_scheduled_task_via_atsvc,T1053: Scheduled Task/Job
+ExtraHop,Scheduled Task Activity (ITaskSchedulerService),msrpc_scheduled_task_via_ITaskSchedulerService,T1053: Scheduled Task/Job
+ExtraHop,Scheduled Task Enumeration,scheduled_task_enumeration,"T1053: Scheduled Task/Job, T1082: System Information Discovery"
+ExtraHop,Shellshock DHCP Exploit Attempt,shellshock_dhcp,T1190: Exploit Public-Facing Application
+ExtraHop,Shellshock HTTP Exploit Attempt,shellshock_http,T1190: Exploit Public-Facing Application
+ExtraHop,SIP Brute Force,sip_brute_force,T1110: Brute Force
+ExtraHop,SMB/CIFS Access Denied Errors,smb_cifs_access_denied_errors,T1039: Data from Network Shared Drive
+ExtraHop,SMB/CIFS Account Errors,smb_cifs_valid_login_errors,T1039: Data from Network Shared Drive
+ExtraHop,SMB/CIFS Brute Force,smb_cifs_brute_force,T1110: Brute Force
+ExtraHop,SMB/CIFS Data Staging,suspicious_smb_cifs_data_reads,"T1039: Data from Network Shared Drive, T1114: Email Collection"
+ExtraHop,SMB/CIFS Named Pipe Beaconing,smb_named_pipe_beaconing,T1071: Application Layer Protocol
+ExtraHop,SMB/CIFS Privileged Pipe,smb_cifs_privileged_pipe,T1559: Inter-Process Communication
+ExtraHop,SMB/CIFS Share Enumeration,smb_cifs_share_enumeration,T1135: Network Share Discovery
+ExtraHop,Spike in AAA Failed Login Attempts,aaa_brute_force,T1110: Brute Force
+ExtraHop,Spike in Email Traffic Volume,spike_in_email_traffic_volume,T1566: Phishing
+ExtraHop,Spike in RDP Sessions,spike_in_rdp_sessions,"T1021: Remote Services, T1210: Exploitation of Remote Services"
+ExtraHop,Spike in SSH Sessions,spike_in_ssh_sessions,T1110: Brute Force
+ExtraHop,Spike in Telnet Connections,spike_in_telnet_connections,T1021: Remote Services
+ExtraHop,Spike in VNC Sessions,spike_in_rfb_sessions,T1210: Exploitation of Remote Services
+ExtraHop,Spoofed SSL/TLS Certificate,spoofed_self_signed_ssl_certificate,T1071: Application Layer Protocol
+ExtraHop,SQL Injection (SQLi) Attack,sqli_attack,T1190: Exploit Public-Facing Application
+ExtraHop,SSH Brute Force,ssh_brute_force,T1110: Brute Force
+ExtraHop,SSH Brute Force with Successful Login,ssh_brute_force_success_login,T1110: Brute Force
+ExtraHop,SSL/TLS Connection to a Cryptocurrency Mining Pool,cryptomining_pool_ssl_connection,T1496: Resource Hijacking
+ExtraHop,SSL/TLS Connection to a Suspicious Host,ti_ssl_sni,"T1041: Exfiltration Over C2 Channel, T1189: Drive-by Compromise, T1566: Phishing, T1573: Encrypted Channel"
+ExtraHop,Stalled Data Transfer,stalled_data_transfer,T1498: Network Denial of Service
+ExtraHop,SUNBURST C&C Activity,sunburst,"T1001: Data Obfuscation, T1008: Fallback Channels, T1071: Application Layer Protocol, T1104: Multi-Stage Channels, T1132: Data Encoding, T1568: Dynamic Resolution, T1573: Encrypted Channel"
+ExtraHop,SUPERNOVA Web Shell,supernova_web_shell_command,"T1027: Obfuscated Files or Information, T1041: Exfiltration Over C2 Channel, T1071: Application Layer Protocol, T1105: Ingress Tool Transfer, T1505: Server Software Component"
+ExtraHop,Suspicious FTP Download,suspicious_ftp_download,T1105: Ingress Tool Transfer
+ExtraHop,Suspicious HTTP File Received,suspicious_http_file,T1189: Drive-by Compromise
+ExtraHop,Suspicious NFS File Reads,suspicious_nfs_file_reads,T1074: Data Staged
+ExtraHop,Suspicious NFS File Share Access,suspicious_nfs_file_share_access,T1074: Data Staged
+ExtraHop,Suspicious SMB/CIFS File Reads,suspicious_smb_cifs_file_reads,T1039: Data from Network Shared Drive
+ExtraHop,Suspicious SMB/CIFS File Share Access,suspicious_smb_cifs_file_share_access,"T1485: Data Destruction, T1486: Data Encrypted for Impact"
+ExtraHop,Suspicious SMB/CIFS Named Pipe,suspicious_smb_named_pipe,T1071: Application Layer Protocol
+ExtraHop,Suspicious SSL/TLS Certificates,suspicious_ssl_cert,"T1041: Exfiltration Over C2 Channel, T1071: Application Layer Protocol"
+ExtraHop,"TCP NULL, FIN, or XMAS Scan",tcp_null_fin_or_xmas_scan,T1046: Network Service Scanning
+ExtraHop,TCP SYN Scan,tcp_syn_scan,T1046: Network Service Scanning
+ExtraHop,Telnet Password,telnet_password,"T1021: Remote Services, T1110: Brute Force"
+ExtraHop,Treck TCP/IP Network Stack Detected,ripple20_icmp_treck,"T1018: Remote System Discovery, T1046: Network Service Scanning"
+ExtraHop,UDP Port Scan,udp_port_scan,T1046: Network Service Scanning
+ExtraHop,Unconventional Data Transfer,unconventional_data_transfer,T1074: Data Staged
+ExtraHop,Unconventional External Connection,unconventional_new_external_host,"T1041: Exfiltration Over C2 Channel, T1071: Application Layer Protocol, T1612: Build Image on Host"
+ExtraHop,Unconventional Internal Connection,unconventional_new_internal_host,"T1046: Network Service Scanning, T1083: File and Directory Discovery, T1210: Exploitation of Remote Services, T1599: Network Boundary Bridging"
+ExtraHop,Unconventional Protocol Communication,unconventional_new_protocol,T1021: Remote Services
+ExtraHop,Unconventional RDP Behavior,unconventional_rdp_behavior,T1021: Remote Services
+ExtraHop,Unconventional RDP Data Transfer,unconventional_rdp_data_transfer,T1074: Data Staged
+ExtraHop,Unconventional SMB/CIFS Data Transfer,unconventional_smb_cifs_data_transfer,"T1039: Data from Network Shared Drive, T1074: Data Staged"
+ExtraHop,Unconventional SSH Behavior,unconventional_ssh_behavior,T1110: Brute Force
+ExtraHop,Unconventional SSH Data Transfer,unconventional_ssh_data_transfer,T1074: Data Staged
+ExtraHop,Unconventional Telnet Data Transfer,unconventional_telnet_data_transfer,T1074: Data Staged
+ExtraHop,Unconventional VNC Behavior,unconventional_rfb_behavior,T1219: Remote Access Software
+ExtraHop,Unconventional VNC Data Transfer,unconventional_rfb_data_transfer,T1074: Data Staged
+ExtraHop,Unencrypted Zoom Data,unencrypted_zoom,T1040: Network Sniffing
+ExtraHop,Unencrypted Zoom Data,unencrypted_zoom_individual,T1040: Network Sniffing
+ExtraHop,Unsafe LDAP Authentication,unsafe_ldap_auth,"T1040: Network Sniffing, T1078: Valid Accounts"
+ExtraHop,Unsafe LDAP Authentication,unsafe_ldap_auth_individual,"T1040: Network Sniffing, T1078: Valid Accounts"
+ExtraHop,Unusual Download from S3 Bucket,unusual_s3_download,"T1074: Data Staged, T1530: Data from Cloud Storage Object"
+ExtraHop,Unusual Executable File Download,external_exec_file_download,T1204: User Execution
+ExtraHop,Unusual Host Connection from a High Value Device,high_value_device_unusual_host,"T1071: Application Layer Protocol, T1095: Non-Application Layer Protocol"
+ExtraHop,Unusual HTML Application (HTA) File Download,suspicious_hta_download,"T1204: User Execution, T1218: Signed Binary Proxy Execution"
+ExtraHop,Unusual Interactive Traffic from a Remote Desktop,interactive_traffic_remote_desktop,"T1008: Fallback Channels, T1104: Multi-Stage Channels, T1205: Traffic Signaling, T1219: Remote Access Software, T1572: Protocol Tunneling, T1573: Encrypted Channel"
+ExtraHop,Unusual Interactive Traffic from an External Endpoint,interactive_traffic_shell,"T1008: Fallback Channels, T1059: Command and Scripting Interpreter, T1104: Multi-Stage Channels, T1205: Traffic Signaling, T1219: Remote Access Software, T1505: Server Software Component, T1572: Protocol Tunneling, T1573: Encrypted Channel"
+ExtraHop,Unusual IoT Protocol Activity,unusual_iot_protocol,T1071: Application Layer Protocol
+ExtraHop,Unusual Kerberos Fingerprint,unusual_kerberos_fingerprint,T1558: Steal or Forge Kerberos Tickets
+ExtraHop,Unusual LDAP Query Activity,unusual_ldap_query_activity,"T1018: Remote System Discovery, T1069: Permission Groups Discovery, T1087: Account Discovery, T1482: Domain Trust Discovery, T1615: Group Policy Discovery"
+ExtraHop,Unusual Login Time,unusual_user_login_time,T1078: Valid Accounts
+ExtraHop,Unusual Protocol Connection from a High Value Device,high_value_device_unusual_protocol,"T1071: Application Layer Protocol, T1095: Non-Application Layer Protocol"
+ExtraHop,Unusual Protocol for Enterprise Software,unusual_protocol_for_enterprise_software,"T1071: Application Layer Protocol, T1095: Non-Application Layer Protocol"
+ExtraHop,Unusual Sensitive Data Transfer,sensitive_data_transfer,"T1020: Automated Exfiltration, T1029: Scheduled Transfer, T1030: Data Transfer Size Limits, T1041: Exfiltration Over C2 Channel, T1048: Exfiltration Over Alternative Protocol, T1567: Exfiltration Over Web Service"
+ExtraHop,Unusual SMB/CIFS Executable File Transfer,suspicious_smb_cifs_file_transfer,"T1080: Taint Shared Content, T1570: Lateral Tool Transfer"
+ExtraHop,Unusual User Creation,abnormal_user_creation,T1136: Create Account
+ExtraHop,User Session Enumeration,msrpc_netsession_enum,T1087: Account Discovery
+ExtraHop,VNC Brute Force,rfb_brute_force,T1110: Brute Force
+ExtraHop,VPN Client Data Exfiltration,data_exfil_by_vpn,T1048: Exfiltration Over Alternative Protocol
+ExtraHop,VPN Gateway Access from an Unusual Location,vpn_gateway_unusual_location,T1133: External Remote Services
+ExtraHop,Weak Kerberos Encryption,weak_kerberos_encryption_attempt,T1558: Steal or Forge Kerberos Tickets
+ExtraHop,Web Directory Scan,web_directory_scan,"T1083: File and Directory Discovery, T1518: Software Discovery"
+ExtraHop,Windows Account Enumeration,local_admin_enumeration,"T1069: Permission Groups Discovery, T1087: Account Discovery"
+ExtraHop,Windows Registry Enumeration,msrpc_registry_enumeration_via_winreg,"T1012: Query Registry, T1112: Modify Registry"
+ExtraHop,WordPress Brute Force,wordpress_brute_force,T1110: Brute Force

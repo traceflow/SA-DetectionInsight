@@ -8,7 +8,7 @@
 
 |                       |                                                         |
 |-----------------------|---------------------------------------------------------|
-| Version               | 1.0.1                                                   |
+| Version               | 1.0.2                                                   |
 | Visible in Splunk Web | No.                                                     |
 
 ### Release Notes
@@ -168,7 +168,20 @@ Two additional lookups are provided with this add-on to add contextual descripti
 ### Additional MITRE product detections
 
 Users can also **optionally** map MITRE detections from other products by adding the information to the `other_mitre_detections_by_product.csv` lookup file.
-A working example from ExtraHop is available under `lookups/contrib`.  Information added to this lookup will become available in the **MITRE Att&ck Details** tab if provided.
+Working examples for [Aurora Agent](https://www.nextron-systems.com/aurora/) and ExtraHop are available under `lookups/contrib`.  Information added to this lookup will become available in the **MITRE Att&ck Details** tab if provided.
+
+### Generating the `contrib` lookups
+
+#### Aurora EDR
+
+Here's an example (MacOS/zsh) of generating the detection content provided with the Aurora EDR Agent, which is based on open source [Sigma rules](https://github.com/SigmaHQ/sigma):
+
+```sh
+brew install yq
+git clone git@github.com:SigmaHQ/sigma.git
+cd sigma/rules
+(echo "Product,Detection,Additional_Information,Technique" && yq -N -o=csv '["Aurora EDR", .title, .description | trim, .tags // [] | join(",") | sub("attack.t","T")]' ./**/*.yml) > aurora_mitre_detections.csv
+```
 
 ## What does it look like?
 
