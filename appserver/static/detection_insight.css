@@ -88,20 +88,36 @@ td.data-bar-cell .data-bar-wrapper .data-bar {
 }
 
 /* Hide the two last rows of this Table visualization, as they are used for drilldowns only. */
-#statistics > table > thead > tr > th:nth-child(5) {
+div[id=tableDetectionChecks] table:first-child>thead>tr>th:nth-child(5) {
     display: none;
 }
 
-#statistics > table > tbody > tr > td:nth-child(5) {
+div[id=tableDetectionChecks] table table:first-child>thead>tr>th:nth-child(5) {
+    display: table-cell;
+}
+
+div[id=tableDetectionChecks] table:first-child>tbody>tr>td:nth-child(5) {
     display: none;
 }
 
-#statistics > table > thead > tr > th:nth-child(6) {
+div[id=tableDetectionChecks] table table:first-child>tbody>tr>td:nth-child(5) {
+    display: table-cell;
+}
+
+div[id=tableDetectionChecks] table:first-child>thead>tr>th:nth-child(6) {
     display: none;
 }
 
-#statistics > table > tbody > tr > td:nth-child(6) {
+div[id=tableDetectionChecks] table table:first-child>thead>tr>th:nth-child(6) {
+    display: table-cell;
+}
+
+div[id=tableDetectionChecks] table:first-child>tbody>tr>td:nth-child(6) {
     display: none;
+}
+
+div[id=tableDetectionChecks] table table:first-child>tbody>tr>td:nth-child(6) {
+    display: table-cell;
 }
 
 #tableAnnotations {

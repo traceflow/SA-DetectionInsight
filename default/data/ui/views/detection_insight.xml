@@ -143,7 +143,7 @@ $tab_overview_token$
         <delimiter> OR </delimiter>
       </input>
       <table id="tableDetectionChecks">
-        <title>Note: Expand a particular check row to get more details.</title>
+        <title>Note: Expand a particular check row to get more details.  Clicking on a detection will open its configuration page in a new browser tab.</title>
         <search base="baseDetectionsSearch">
           <query>$tab_overview_token$
 | where isnotnull('action.correlationsearch.enabled')
@@ -159,7 +159,6 @@ $tab_overview_token$
 | lookup check_to_macro_map_lookup check_name as Check OUTPUT details_search_macro, details_search_label</query>
         </search>
         <option name="drilldown">none</option>
-        <option name="refresh.display">progressbar</option>
       </table>
     </panel>
   </row>
@@ -359,17 +358,7 @@ $tab_overview_token$
    | eval model_exists = 1
    | rename name as model_name
 ]
-| eval issue1 = if(isnotnull(datamodel) AND accelerated=="false", "Uses a non-accelerated data model (" + datamodel + ")", null())
-| eval issue2 = if(isnotnull(datamodel) AND size==0, "Uses an empty data model (" + datamodel + ")", null())
-| eval issue3 = if(isnotnull(datamodel) AND last_error!="", "Uses a data model with recent acceleration errors (" + datamodel + ")", null())
-| eval issue4 = if(isnotnull(datamodel) AND (datamodel == "Application_State" OR datamodel == "Change_Analysis"), "Uses a deprecated data model (" + datamodel + ")", null())
-| eval issue5 = if(actions=="&lt;none&gt;", "Has no actions defined", null())
-| eval issue6 = if(Domain == "&lt;none&gt;", "Not mapped to a Security Domain", null())
-| eval issue7 = if(isnull(Technique) OR Technique == "", "Not mapped to MITRE ATT&amp;CK", null())
-| eval issue8 = if(match(actions, "risk") AND risk_score == 0, "Should generate non-zero risk", null())
-| eval issue9 = if(risk_score &gt; 0 AND (risk_score_dev &gt;= 10 OR risk_score_dev &lt;= 0.1), "Significant Risk Score deviation from average", null())
-| eval issue10 = if(isnotnull(model_name) AND model_exists == 0, "Uses missing machine-learning model (" + model_name + ")", null())
-| eval issues = coalesce(mvappend(issue1, issue2, issue3, issue4, issue5, issue6, issue7, issue8, issue9, issue10), "None")
+`check_for_issues`
 | eval issues_count = coalesce(mvcount(mvfilter(issues!="None")), 0)
 | rename actions as "Actions", risk_score as "Risk Score", usesML as "Uses Machine Learning?", command_type as "Main SPL Command", issues_count as "Potential Issue(s)", issues as "Issue Details"
 | table Name, "Triggering Trend", "Enabled?", "Provided By", Application, Domain, "Main SPL Command", "Uses Machine Learning?", "Actions", "Risk Score", "Potential Issue(s)", "Issue Details"</query>
@@ -441,7 +430,7 @@ $tab_overview_token$
         <default>*</default>
         <initialValue>*</initialValue>
       </input>
-      <table>
+      <table id="tableDetectionChangesEnterprise">
         <title>Note: Detections that were only enabled/disabled will not also show separately as modifications. Uses the _configtracker index since this is an on-premises deployment.</title>
         <search>
           <query>index=_configtracker component=ConfigChange data.path=*savedsearches.conf data.changes{}.properties{}.new_value=* $tab_detections_token$
@@ -451,8 +440,8 @@ $tab_overview_token$
 | eval provided_by = case(app=="DA-ESS-ContentUpdate", "ESCU", match(app, "DA-ESS-.*|SA-.*Protection|SA-IdentityManagement|SA-ThreatIntelligence|SplunkEnterpriseSecurity"), "ES", true(), "Other") 
 | eval Action = case('data.changes{}.properties{}.new_value'="0" AND mvindex('data.changes{}.properties{}.name',0)="disabled", "Enabled", 'data.changes{}.properties{}.new_value'="1" AND mvindex('data.changes{}.properties{}.name',0)="disabled", "Disabled", true(), "Modified")
 | search Action IN $tokChangeActions$
-| rename _time as "Modification Time", app as "Application", provided_by as "Provided by", data.changes{}.stanza as Title, data.changes{}.properties{}.name as Properties, data.changes{}.properties{}.new_value as Values
-| table "Modification Time", "Provided by", Application, Action, Title, Properties, Values
+| rename _time as "Modification Time", app as "Application", provided_by as "Provided by", data.changes{}.stanza as Name, data.changes{}.properties{}.name as Properties, data.changes{}.properties{}.new_value as Values
+| table "Modification Time", "Provided by", Application, Action, Name, Properties, Values
 | convert ctime("Modification Time")</query>
           <earliest>$tokChangesTimeOP.earliest$</earliest>
           <latest>$tokChangesTimeOP.latest$</latest>
@@ -482,7 +471,7 @@ $tab_overview_token$
         <default>*</default>
         <initialValue>*</initialValue>
       </input>
-      <table>
+      <table id="tableDetectionChangesCloud">
         <title>Note: Changes listed here do not provide details as to what was changed as that feature is not available yet for Splunk Cloud deployments.</title>
         <search>
           <query>index=_internal sourcetype=splunkd_ui_access method=POST uri="/*/splunkd/__raw/servicesNS/*/*/saved/searches/*" uri!="*/dispatch" 
@@ -492,7 +481,7 @@ $tab_overview_token$
 | eval rule_name = urldecode(file)
 | search rule_name = "$tokRuleFilterCloud$"
 | table _time, provided_by, app, user, clientip, rule_name
-| rename _time as "Modification Time", provided_by as "Provided by", app as "Application", user as "Modified By", clientip as "Client IP", rule_name as "Detection Name"
+| rename _time as "Modification Time", provided_by as "Provided by", app as "Application", user as "Modified By", clientip as "Client IP", rule_name as "Name"
 | convert ctime("Modification Time")</query>
           <earliest>$tokChangesTimeCloud.earliest$</earliest>
           <latest>$tokChangesTimeCloud.latest$</latest>
@@ -755,7 +744,7 @@ $tab_overview_token$
   <row id="tab_scheduling_2">
     <panel>
       <title>Scheduled Search Details</title>
-      <table>
+      <table id="tableScheduledSearchDetails">
         <title>Note: Real-time searches (based on Search Type) are performance intensive by nature - consider if you really need them in your environment.</title>
         <search base="baseDetectionsSearch">
           <query>$tab_scheduling_token$
@@ -767,12 +756,7 @@ $tab_overview_token$
 | eventstats count as total
 | eventstats count by cron_schedule, total
 | eval percent = round(count/total * 100, 2)
-| eval issue1 = if(search_type = "real-time", "Performance intensive scheduling mode", null())
-| eval issue2 = if(disabled=0 AND is_scheduled = 0, "Enabled but not scheduled", null())
-| eval issue3 = if(percent &gt; `max_search_grouping_percentage`, "Part of a CRON schedule that has a high percentage of total searches (" + percent + "%)", null())
-| eval issue4 = if(schedule_window = "0", "Consider using \"auto\" Schedule Windows", null())
-| eval issue5 = if(allow_skew = "0", "Consider setting an allow_skew value", null())
-| eval issues = coalesce(mvappend(issue1, issue2, issue3, issue4, issue5), "None")
+`check_for_scheduling_issues`
 | eval issues_count = coalesce(mvcount(mvfilter(issues!="None")), 0)
 | table next_scheduled_time, eai:acl.app, category, Name, cron_schedule, schedule_priority, schedule_window, allow_skew, search_type, schedule_type, issues_count, issues
 | sort next_scheduled_time
@@ -828,6 +812,14 @@ $tab_overview_token$
     <panel>
       <title>Scheduled Searches Distribution</title>
       <chart>
+        <search base="baseDetectionsSearch">
+          <query>
+$tab_scheduling_token$
+| eval category=if(match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]") , "Correlation Search", if(isnull(alert_threshold) OR alert_threshold == "", "Scheduled Search", "Alert"))
+| where disabled = 0 AND is_scheduled = 1 AND $tokSearchCategory$
+| eval _time = strptime(next_scheduled_time, "%Y-%m-%d %H:%M:%S %Z")
+| timechart cont=false span=30s count as "Scheduled Searches" by category</query>
+        </search>
         <search base="baseDetectionsSearch" type="annotation">
           <query>
 $tab_scheduling_token$
@@ -839,14 +831,6 @@ $tab_scheduling_token$
 | eval annotation_label = "High number of total searches: " + count
 | eval annotation_category = "Warning"
           </query>
-        </search>
-        <search base="baseDetectionsSearch">
-          <query>
-$tab_scheduling_token$
-| eval category=if(match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]") , "Correlation Search", if(isnull(alert_threshold) OR alert_threshold == "", "Scheduled Search", "Alert"))
-| where disabled = 0 AND is_scheduled = 1 AND $tokSearchCategory$
-| eval _time = strptime(next_scheduled_time, "%Y-%m-%d %H:%M:%S %Z")
-| timechart cont=false span=30s count as "Scheduled Searches" by category</query>
         </search>
         <option name="charting.annotation.categoryColors">{"Warning":"#f96600"}</option>
         <option name="charting.chart">column</option>

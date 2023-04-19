@@ -19,23 +19,39 @@
 
 **v1.0.2** - _Coming soon_
 
-_Overview_
+_General_
 
 - Added the ability to add checks based on unmanaged annotations, for example to map Atomic Red Team Test GUID(s) to detections
+- Added link to go directly to a detection configuration page in a new tab to most dashboard panels
+- Fixed an issue where some table columns were incorrectly hidden via CSS
 
 _Detection Details_
 
 - Now includes a column to identify if a detection uses machine-learning features
 - Add Risk Score to the table, removed MITRE Technique (can still filter on it)
-- Added 10 different checks for potential issues
+- Added 10+ new checks for potential issues:
+	- Use of a non-accelerated data model
+	- Use of an empty data model
+	- Use of a data model with recent acceleration errors
+	- Use of a deprecated data model
+	- No action defined (e.g. Generate Notable, Contribute Risk)
+	- Not mapped to a Security Domain
+	- Not mapped to MITRE Att&ck
+	- Set to contribute risk but has a risk score of 0 or null
+	- Significant risk score deviation from avarage risk-based rules
+	- Use of a missing machine learning model
+	- Owner is no longer a listed Splunk user (orphaned detection)
 - Added Confidence and Impact details to the expanded detection section
 - Minor cosmetic improvements
 
 _Scheduling Details_
 
-- Added additional checks for potential issues
-
-**v1.0.2** - Released _TBD_
+- Added additional checks for potential issues:
+	- Use of real-time scheduling mode
+	- Enabled but not scheduled
+	- Part of a CRON schedule that has a high percentage of concurrrent searches
+	- Not set to allow "auto" Schedule Windows
+	- Not set to allow schduling _skew_ values
 
 _MITRE Att&ck Details_
 

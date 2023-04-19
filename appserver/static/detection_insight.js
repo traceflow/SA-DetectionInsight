@@ -40,14 +40,36 @@ require([
     // Syntax highlight SPL using Prism.js.
     var TableDetectionChecksCellRenderer = TableView.BaseCellRenderer.extend({
         canRender: function(cell) {
-            // Enable this custom cell renderer for all the "flag" fields (6th in the row) and cells
+            // Enable this custom cell renderer for all Detection titles, the "flag" fields (6th in the row) and cells
             // that contain SPL searches.
-            return cell.index === 5 || cell.field === 'Contributing Events Search';
+            return cell.index === 5 || cell.field === 'Name' || cell.field === 'Contributing Events Search';
         },
         render: function($td, cell) {
+            // Create hyperlink to detection configuration page.
+            if (cell.field === 'Name') {
+                var categoryCell = _(rowData.cells).find(function(cell) {
+                    return cell.field === 'Category';
+                });
+                
+                // One of the tables (scheduling details) has a category cell, others don't.
+                // Only add a link when that column is not present or when the category is "Correlation Search".
+                if (!categoryCell || categoryCell.value === 'Correlation Search') {
+                    var encoded = encodeURIComponent(cell.value);
+                    var link = $("<a>", {href: "/app/SplunkEnterpriseSecuritySuite/correlation_search_edit?search=" + encoded, target: "_blank", text: cell.value});
+                        link.on("click", function() {
+                        window.open($(this).attr("href"));
+                    });
+                    $td.append(link);
+                } else {
+                    var value = cell.value;
+                    $td.text(value);
+                }
+            } else {
+                var value = cell.value;
+                $td.text(value);
+            }
+
             // Add a class to the cell based on the returned value
-            var value = cell.value;
-            $td.text(value);
             if (value === 'Yes') {
                 $td.addClass('yes-cell');
             } else if (value === 'No') {
@@ -113,47 +135,19 @@ require([
             var checkCell = _(rowData.cells).find(function(cell) {
                 return cell.field === 'Check';
             });
+            var macroCell = _(rowData.cells).find(function(cell) {
+                return cell.field === 'details_search_macro';
+            });
+            var labelCell = _(rowData.cells).find(function(cell) {
+                return cell.field === 'details_search_label';
+            });
 
             var dropdownDetailsLabel = $("<label>", {id: "dropdownDetailsLabel", style: "padding-left: 14px; font-family: Splunk Platform Sans"});
 
             console.log("Check being expanded: ", checkCell.value);
 
-            switch (checkCell.value) {
-                case "Detection has a Contributing Event Search":
-                    dropdownDetailsLabel.text("Has Search?");
-                    macroName = "get_contributing_search_details";
-                    break;
-                case "Detection generates Notable Events":
-                    dropdownDetailsLabel.text("Generates Notable Event?");
-                    macroName = "get_notable_details";
-                    break;
-                case "Detection generates Risk":
-                    dropdownDetailsLabel.text("Contributes Risk?");
-                    macroName = "get_risk_details";
-                    break;
-                case "Detection uses Threat Intelligence Management Action":
-                    dropdownDetailsLabel.text("Uses Threat Intealligence Management?");
-                    macroName = "get_tim_details";
-                    break;
-                case "Detection is mapped to MITRE Att&ck":
-                    dropdownDetailsLabel.text("Mapped to MITRE?");
-                    macroName = "get_mitre_details";
-                    break;
-                case "Detection is mapped to CIS20":
-                    dropdownDetailsLabel.text("Mapped to CIS20?");
-                    macroName = "get_cis20_details";
-                    break;
-                case "Detection is mapped to NIST":
-                    dropdownDetailsLabel.text("Mapped to NIST?");
-                    macroName = "get_nist_details";
-                    break;
-                case "Detection is mapped to KillChain":
-                    dropdownDetailsLabel.text("Mapped to KillChain?");
-                    macroName = "get_killchain_details";
-                    break;
-                default:
-                    console.error("Unexpected check value: ", checkCell.value);
-            }
+            dropdownDetailsLabel.text(labelCell.value);
+            macroName = macroCell.value;
 
             var spl = '`' + macroName + '("' + tokenStatusValue + '","' + tokenDomainValue + '","' + this._dropdownView.val() + '")`';
             console.log("SPL Query:", spl);
@@ -244,10 +238,12 @@ require([
                 var mitreAttack = [].concat(annotationResults["mitre_attack"] || "N/A");
                 var nist = [].concat(annotationResults["nist"] || "N/A");
                 var observables = [].concat(annotationResults["observable"] || "N/A");
+                var confidence = [].concat(annotationResults["confidence"] || "N/A");
+                var impact = [].concat(annotationResults["impact"] || "N/A");
 
                 // Render using a custom HTML table.
                 var annotationTable = $("<table>", {id: "tableAnnotations"});
-                annotationTable.append('<tr><td id="annotationContext"/><td id="annotationStories"/><td id="annotationCVEs"/><td id="annotationMitre"/><td id="annotationCIS20"/><td id="annotationNIST"/><td id="annotationKillchain"/></tr>');
+                annotationTable.append('<tr><td id="annotationContext"/><td id="annotationStories"/><td id="annotationCVEs"/><td id="annotationMitre"/><td id="annotationCIS20"/><td id="annotationNIST"/><td id="annotationKillchain"/><td id="annotationConfidence"/><td id="annotationImpact"/></tr>');
                 $container.append(annotationTable);
 
                 $('#annotationStories').append("<h3 class='annotationHeader'>Analytic Stories</h3>");
@@ -393,6 +389,24 @@ require([
                     }
                     $('#annotationNIST').append(entry);
                 });
+
+                $('#annotationConfidence').append("<h3 class='annotationHeader'>Confidence</h3>");
+                _.each(confidence, function(val, key) {
+                    var entry = $("<div>", {class: "annotationDiv", text: val});
+                    if (val != "N/A") {
+                        entry.addClass("annotationConfidence");
+                    }
+                    $('#annotationConfidence').append(entry);
+                });
+
+                $('#annotationImpact').append("<h3 class='annotationHeader'>Impact</h3>");
+                _.each(impact, function(val, key) {
+                    var entry = $("<div>", {class: "annotationDiv", text: val});
+                    if (val != "N/A") {
+                        entry.addClass("annotationImpact");
+                    }
+                    $('#annotationImpact').append(entry);
+                });
             });
         }
     });
@@ -404,10 +418,20 @@ require([
     });
     mvc.Components.get('tableDetectionDetails').getVisualization(function(tableView) {
         tableView.addCellRenderer(new ItalicGrayCellRenderer());
+        tableView.addCellRenderer(new TableDetectionChecksCellRenderer());
         tableView.addRowExpansionRenderer(new TableDetectionDetailsRowExpansionRenderer());
     });
     mvc.Components.get('tableCronGroupings').getVisualization(function(tableView) {
         tableView.addCellRenderer(new DataBarPercentCellRenderer());
+    });
+    mvc.Components.get('tableDetectionChangesEnterprise').getVisualization(function(tableView) {
+        tableView.addCellRenderer(new TableDetectionChecksCellRenderer());
+    });
+    mvc.Components.get('tableDetectionChangesCloud').getVisualization(function(tableView) {
+        tableView.addCellRenderer(new TableDetectionChecksCellRenderer());
+    });
+    mvc.Components.get('tableScheduledSearchDetails').getVisualization(function(tableView) {
+        tableView.addCellRenderer(new TableDetectionChecksCellRenderer());
     });
 
     // Check initial setup has been done.
