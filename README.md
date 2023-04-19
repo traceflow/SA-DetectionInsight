@@ -51,7 +51,7 @@ _Scheduling Details_
 	- Enabled but not scheduled
 	- Part of a CRON schedule that has a high percentage of concurrrent searches
 	- Not set to allow "auto" Schedule Windows
-	- Not set to allow schduling _skew_ values
+	- Not set to allow Scheduling _skew_ values
 
 _MITRE Att&ck Details_
 
