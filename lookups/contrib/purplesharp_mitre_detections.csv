@@ -1,0 +1,35 @@
+Product,Detection,Additional_Information,Technique
+PurpleSharp,"OS Credential Dumping: LSASS Memory",,T1003.001
+PurpleSharp,"System Service Discovery",,T1007
+PurpleSharp,"System Network Configuration Discovery",,T1016
+PurpleSharp,"Remote Services: Windows Remote Management",,T1021.006
+PurpleSharp,"System Owner/User Discovery",,T1033
+PurpleSharp,"Network Service Scanning",,T1046
+PurpleSharp,"System Network Connections Discovery",,T1049
+PurpleSharp,"Scheduled Task/Job: Scheduled Task",,T1053.005
+PurpleSharp,"Process Injection: Portable Executable Injection",,T1055.002
+PurpleSharp,"Process Injection: Asynchronous Procedure Call",,T1055.004
+PurpleSharp,"Command and Scripting Interpreter: PowerShell","2 variations",T1059.001
+PurpleSharp,"Command and Scripting Interpreter: Windows Command Shell",,T1059.003
+PurpleSharp,"Command and Scripting Interpreter: Visual Basic",,T1059.005
+PurpleSharp,"Command and Scripting Interpreter: JavaScript/JScript",,T1059.007
+PurpleSharp,"File and Directory Discovery",,T1083
+PurpleSharp,"Account Discovery: Local Account",,T1087.001
+PurpleSharp,"Account Discovery: Domain Account","2 variations",T1087.002
+PurpleSharp,"Brute Force: Password Spraying","2 variations",T1110.003
+PurpleSharp,"Network Share Discovery",,T1135
+PurpleSharp,"Create Account: Local Account","2 variations",T1136.001
+PurpleSharp,"Deobfuscate/Decode Files or Information",,T1140
+PurpleSharp,"BITS Jobs",,T1197
+PurpleSharp,"Signed Binary Proxy Execution: CMSTP",,T1218.003
+PurpleSharp,"Signed Binary Proxy Execution: InstallUtil",,T1218.004
+PurpleSharp,"Signed Binary Proxy Execution: Mshta",,T1218.005
+PurpleSharp,"Signed Binary Proxy Execution: Regsvcs/Regasm",,T1218.009
+PurpleSharp,"Signed Binary Proxy Execution: Regsvr32",,T1218.010
+PurpleSharp,"Signed Binary Proxy Execution: Rundll32",,T1218.011
+PurpleSharp,"XSL - Script Processing","2 variations",T1220
+PurpleSharp,"Create or Modify System Process: Windows Service","2 variations",T1543.003
+PurpleSharp,"Event Triggered Execution: Windows Management Instrumentation Event Subscription",,T1546.003
+PurpleSharp,"Boot or Logon Autostart Execution: Registry Run Keys","2 variations",T1547.001
+PurpleSharp,"Steal or Forge Kerberos Tickets: Kerberoasting",,T1558.003
+PurpleSharp,"System Services: Service Execution",,T1569.002

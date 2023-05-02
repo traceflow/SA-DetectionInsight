@@ -1,0 +1,1 @@
+Copy any or all lookups here to the main other_mitre_detections_by_product.csv lookup if you'd like to be able to visualize MITRE coverage from these external solutions.

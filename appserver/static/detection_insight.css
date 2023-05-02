@@ -121,7 +121,7 @@ div[id=tableDetectionChecks] table table:first-child>tbody>tr>td:nth-child(6) {
 }
 
 #tableAnnotations {
-    width: 100%; 
+    width: 100%;
     font-family: Splunk Platform Sans;
 }
 
@@ -133,8 +133,8 @@ div[id=tableDetectionChecks] table table:first-child>tbody>tr>td:nth-child(6) {
     border-radius: 15px;
     border: 1px solid #2b3033;
     width: fit-content;
-    margin-bottom: 5px;  
-    background-color: #777777; 
+    margin-bottom: 5px;
+    background-color: #777777;
 }
 
 .annotationStories {
@@ -146,7 +146,7 @@ div[id=tableDetectionChecks] table table:first-child>tbody>tr>td:nth-child(6) {
 }
 
 .annotationContext {
-    background-color: #2EA39B;   
+    background-color: #2EA39B;
 }
 
 .annotationCVEs {
@@ -185,7 +185,42 @@ div[id=tableDetectionChecks] table table:first-child>tbody>tr>td:nth-child(6) {
     background-color: #212527;
 }
 
-#dendrogramViz {
-    border: 1px solid #65778a;
-    background-color: #2b3033;
+.collapsibleButton {
+  background-color: #2B3033;
+  color: white;
+  cursor: pointer;
+  padding: 1em;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 14px;
+  font-weight: normal;
+  margin: unset !important;
+}
+
+.collapsibleActive, .collapsibleButton:hover {
+  background-color: #4872B0;
+  font-weight: bold;
+}
+
+.collapsibleButton:after {
+  content: '\002B';
+  color: white;
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
+}
+
+.collapsibleActive:after {
+  content: "\2212";
+}
+
+.collapsibleContent {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: #000000;
+  border: 1px solid #2B3033;
 }

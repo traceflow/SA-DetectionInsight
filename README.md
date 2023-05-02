@@ -11,56 +11,13 @@
 | Version               | 1.0.2                                                   |
 | Visible in Splunk Web | No.                                                     |
 
-### Release Notes
+### Release History - See individual releases for notes
 
 **v1.0.0** - Initial release
 
 **v1.0.1** - Released 2023-03-24
 
-**v1.0.2** - _Coming soon_
-
-_General_
-
-- Added the ability to add checks based on unmanaged annotations, for example to map Atomic Red Team Test GUID(s) to detections
-- Added link to go directly to a detection configuration page in a new tab to most dashboard panels
-- Fixed an issue where some table columns were incorrectly hidden via CSS
-
-_Detection Details_
-
-- Now includes a column to identify if a detection uses machine-learning features
-- Add Risk Score to the table, removed MITRE Technique (can still filter on it)
-- Added 10+ new checks for potential issues:
-	- Use of a non-accelerated data model
-	- Use of an empty data model
-	- Use of a data model with recent acceleration errors
-	- Use of a deprecated data model
-	- No action defined (e.g. Generate Notable, Contribute Risk)
-	- Not mapped to a Security Domain
-	- Not mapped to MITRE Att&ck
-	- Set to contribute risk but has a risk score of 0 or null
-	- Significant risk score deviation from avarage risk-based rules
-	- Use of a missing machine learning model
-	- Owner is no longer a listed Splunk user (orphaned detection)
-- Added Confidence and Impact details to the expanded detection section
-- Minor cosmetic improvements
-
-_Scheduling Details_
-
-- Added additional checks for potential issues:
-	- Use of real-time scheduling mode
-	- Enabled but not scheduled
-	- Part of a CRON schedule that has a high percentage of concurrrent searches
-	- Not set to allow "auto" Schedule Windows
-	- Not set to allow Scheduling _skew_ values
-
-_MITRE Att&ck Details_
-
-- Added the ability to filter the MITRE visualization to a specific [MITRE Matrix](https://attack.mitre.org/matrices/)
-- The visualization now shows subtechniques as well
-- Added the ability to show MITRE coverage for external products, see the `lookups` section below for details
-
-Make sure to upgrade the prerequisite [MITRE ATTCK Heatmap visualisation](https://splunkbase.splunk.com/app/5742) to the latest version - 1.6.1 for this to work.
-
+**v1.0.2** - Released 2023-05-02
 
 ## Description
 
@@ -133,6 +90,7 @@ The following dependencies are required by the dashboards in this supporting add
 - [MITRE ATTCK Heatmap for Splunk](https://splunkbase.splunk.com/app/5742)
 - [Sunburst Viz](https://splunkbase.splunk.com/app/4550)
 - [Event Timeline Viz](https://splunkbase.splunk.com/app/4370)
+- [Calendar Heat Map - Custom Visualization](https://splunkbase.splunk.com/app/3162)
 
 ## Configuration
 
@@ -186,7 +144,7 @@ Two additional lookups are provided with this add-on to add contextual descripti
 ### Additional MITRE product detections
 
 Users can also **optionally** map MITRE detections from other products by adding the information to the `other_mitre_detections_by_product.csv` lookup file.
-Working examples for [Aurora Agent](https://www.nextron-systems.com/aurora/) and ExtraHop are available under `lookups/contrib`.  Information added to this lookup will become available in the **MITRE Att&ck Details** tab if provided.
+Working examples for [Atomic Red Team](https://github.com/redcanaryco/atomic-red-team), [PurpleSharp](https://www.purplesharp.com/en/latest/), [Aurora Agent](https://www.nextron-systems.com/aurora/) and ExtraHop are available under `lookups/contrib`.  Information added to this lookup will become available in the **MITRE Att&ck Details** tab if provided.
 
 ### Generating the `contrib` lookups
 
@@ -199,6 +157,14 @@ brew install yq
 git clone git@github.com:SigmaHQ/sigma.git
 cd sigma/rules
 (echo "Product,Detection,Additional_Information,Technique" && yq -N -o=csv '["Aurora EDR", .title, .description | trim, .tags // [] | join(",") | sub("attack.t","T")]' ./**/*.yml) > aurora_mitre_detections.csv
+```
+
+#### Atomic Red Team
+
+Here's an example (MacOS/zsh) of generating the detection content provided by Atomic Red Team, from their GitHub repository:
+
+```sh
+(echo "Product,Detection,Additional_Information,Technique" && curl -k --silent https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/Indexes/Indexes-CSV/index.csv | awk '{if (NR!=1) {print "Atomic Red Team",$4 " - " $5,$6,$2}}' FS=, OFS=,) > art_mitre_detections.csv
 ```
 
 ## What does it look like?
@@ -280,6 +246,10 @@ The last panel on this tab gives you a visual overview of your scheduled searche
 
 ![Scheduled Search Distribution](readme/ScheduledSearchDistribution.png)
 
+The **Performance Details** tab give users insight into the various concurrency search limits as well as detailed insight into search activity/volume/contention and performance.
+
+![Search Limits - Performance](readme/PerformanceDetails.png)
+
 ## Notes & Feedback
 
 I plan to keep on improving this add-on, for example by adding additional checks, reporting more potential issues, displaying scheduling bottlenecks in an even better manner, allowing updates to underlying configurations directly, etc.
@@ -294,6 +264,10 @@ This add-on was run through [AppInspect](https://dev.splunk.com/enterprise/docs/
 
 > Many thanks to [Mohammed Latif](https://github.com/alatif113) for the amazing MITRE Heat Map Visualization.
 
+> Inspiration from the great work done by [Gabriel Vasseur](https://www.gabrielvasseur.com/).
+
 > Modal dialog code from the awesome [Splunk Dev for All](https://splunkbase.splunk.com/app/4104) app by current and former Splunkers. 
+
+> How Splunk Search Concurrency works diagram based on work and with support from [Gerry D'Costa](https://github.com/gdcosta).
 
 > Tabs feature sourced very heavily from the blog [post](https://www.splunk.com/en_us/blog/tips-and-tricks/making-a-dashboard-with-tabs-and-searches-that-run-when-clicked.html) by Luke Murphey.

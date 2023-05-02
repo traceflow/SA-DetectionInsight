@@ -34,6 +34,54 @@
       </condition>
     </finalized>
   </search>
+  <!-- Base search for Search Concurrency Configuration and Metrics -->
+  <search id="baseSearchConcurrency">
+    <query>
+      | rest splunk_server=local count=1 /services/server/info 
+      | table numberOfVirtualCores, physicalMemoryMB, version 
+      | appendcols 
+        [| rest splunk_server=local /services/configs/conf-limits/scheduler 
+        | table auto_summary_perc, max_searches_perc] 
+      | appendcols 
+        [| rest splunk_server=local /services/configs/conf-limits/search 
+        | table base_max_searches, max_searches_per_cpu] 
+      | appendcols 
+        [| rest splunk_server=local /services/server/status/limits/search-concurrency 
+        | table max_*]
+      | eval physicalMemoryGB = floor(physicalMemoryMB / 1000)
+      | eval adhoc_search_perc = 100 - max_searches_perc
+    </query>
+  </search>
+  <!-- Base search for Search Activity from the _audit index -->
+  <search id="baseSearchSearchActivity">
+    <query>
+      index=_audit sourcetype=audittrail action=search info=completed NOT search_id="'subsearch_*"
+        [| rest splunk_server=local count=1 /services/server/info 
+        | table host]
+      | eval search_type = case( 
+        provenance=="scheduler", case( match( savedsearch_name, "_ACCELERATE_DM_*" ), "Data Model Acceleration", match( savedsearch_name, "Rule$$" ), "Correlation Search", 1==1, "Other Scheduled Search" ),
+        match( provenance, "^UI:Dashboard" ), "Dashboard Search",
+        match( provenance, "(?i)summary_director" ), "Data Model Acceleration",
+        1==1, "Ad-hoc Search" ) 
+      | rex field=provenance "^UI:Dashboard:(?&lt;dashboard_name&gt;.*)$" 
+      | eval search_name = case (
+        match( savedsearch_name, "_ACCELERATE_DM_*" ), "Acceleration of " + replace(replace(replace(savedsearch_name, "^_ACCELERATE_DM_", ""), "_ACCELERATE_$", ""), app + "_", "") + " data model",
+        match( provenance, "^UI:Dashboard" ), coalesce( dashboard_name, "Unknown Dashboard" ) . " - " . savedsearch_name,
+        isnotnull(savedsearch_name) AND savedsearch_name!="", savedsearch_name,
+        isnotnull(search_name) AND search_name!="", search_name,
+        1==1, "Generic " . provenance ) 
+      | join type=outer app [
+        | rest splunk_server=local /services/apps/local 
+        | table title, label
+        | rename title as app, label as app_label
+      ]
+      | fillnull value="NULL" _time app app_label search_type search_name total_run_time dashboard_name
+      | fields _time app app_label search_type search_name total_run_time dashboard_name
+      | noop
+    </query>
+    <earliest>-24h@h</earliest>
+    <latest>now</latest>
+  </search>
   <fieldset submitButton="false" autoRun="true"></fieldset>
   <row id="tabs">
     <panel>
@@ -53,6 +101,9 @@
           </li>
           <li>
             <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_scheduling,tab_scheduling_2,tab_scheduling_3,tab_scheduling_4" data-token="tab_scheduling_token">Scheduling Details</a>
+          </li>
+          <li>
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_scheduling_diagram,tab_scheduling_limits,tab_performance,tab_performance_details_1,tab_performance_details_2" data-token="tab_performance_token">Performance Details</a>
           </li>
         </ul>
       </html>
@@ -149,7 +200,18 @@ $tab_overview_token$
 | where isnotnull('action.correlationsearch.enabled')
 | fillnull value="NONE" action.notable.param.security_domain
 | search disabled=$tokStatusOverview$ $tokDomainOverview$
-| stats count as Total count(eval(isnotnull('action.notable.param.drilldown_search'))) as "Detection has a Contributing Event Search" count(eval(match('actions',"notable"))) as "Detection generates Notable Events" count(eval(match('actions',"risk"))) as "Detection generates Risk" count(eval(match('actions',"trustar_submit_event"))) as "Detection uses Threat Intelligence Management Action" count(eval(match('action.correlationsearch.annotations',"mitre_attack"))) as "Detection is mapped to MITRE Att&amp;ck" count(eval(match('action.correlationsearch.annotations',"cis20"))) as "Detection is mapped to CIS20" count(eval(match('action.correlationsearch.annotations',"nist"))) as "Detection is mapped to NIST" count(eval(match('action.correlationsearch.annotations',"kill_chain_phases"))) as "Detection is mapped to KillChain" `get_other_unmanaged_annotations_counts`
+| stats 
+   count as Total 
+   count(eval(isnotnull('action.notable.param.drilldown_search'))) as "Detection has a Contributing Event Search" 
+   count(eval(isnotnull('action.notable.param.next_steps'))) as "Detection has Next Steps Defined"
+   count(eval(match('actions',"notable"))) as "Detection generates Notable Events" 
+   count(eval(match('actions',"risk"))) as "Detection generates Risk" 
+   count(eval(match('actions',"trustar_submit_event"))) as "Detection uses Threat Intelligence Management Action" 
+   count(eval(match('action.correlationsearch.annotations',"mitre_attack"))) as "Detection is mapped to MITRE Att&amp;ck" 
+   count(eval(match('action.correlationsearch.annotations',"cis20"))) as "Detection is mapped to CIS20" 
+   count(eval(match('action.correlationsearch.annotations',"nist"))) as "Detection is mapped to NIST" 
+   count(eval(match('action.correlationsearch.annotations',"kill_chain_phases"))) as "Detection is mapped to KillChain" 
+   `get_other_unmanaged_annotations_counts`
 | foreach *
   [ eval "&lt;&lt;FIELD&gt;&gt;" = '&lt;&lt;FIELD&gt;&gt;' + "/" + Total ]
 | fields - Total*
@@ -159,6 +221,7 @@ $tab_overview_token$
 | lookup check_to_macro_map_lookup check_name as Check OUTPUT details_search_macro, details_search_label</query>
         </search>
         <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
       </table>
     </panel>
   </row>
@@ -578,6 +641,7 @@ $tab_overview_token$
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.legendTitle">Enabled Security Detections</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.matrix">$tokMITREMatrix$</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.midColor">#22908D</option>
+        <option name="mitre_attck_heatmap.mitre_attck_heatmap.showSubTechniques">yes</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.sortOrder">desc</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.startColor">#0C1587</option>
         <option name="mitre_attck_heatmap.mitre_attck_heatmap.theme">dark</option>
@@ -706,6 +770,7 @@ $tab_overview_token$
         <delimiter> OR </delimiter>
       </input>
       <viz type="event-timeline-viz.event-timeline-viz">
+        <title>Note: This visualization is based on the currently planned Next Scheduled Run value.</title>
         <search base="baseDetectionsSearch">
           <query>$tab_scheduling_token$
 | eval category=if(match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]") , "Correlation Search", if(isnull(alert_threshold) OR alert_threshold == "", "Scheduled Search", "Alert"))
@@ -841,6 +906,238 @@ $tab_scheduling_token$
         <option name="height">366</option>
         <option name="refresh.display">progressbar</option>
       </chart>
+    </panel>
+  </row>
+  <row id="tab_scheduling_diagram">
+    <panel>
+      <html>
+        <h3 style="border: 1px dashed #90BAD0; border-left: 6px solid #90BAD0; font-weight: normal; padding: 12px 55px 10px 12px;">Note: Click to expand the section below for a graphical explanation of how Splunk Search Concurrency Limits work.</h3>
+        <button class="collapsibleButton">&gt; How Search Concurrency works...</button>
+        <div class="collapsibleContent">
+          <img alt="Splunk Search Concurrency Diagram" style="margin: auto; display: block;" src="/static/app/SA-DetectionInsight/images/search_concurrency_diagram.png"/>
+        </div>
+      </html>
+    </panel>
+  </row>
+  <row id="tab_scheduling_limits">
+    <panel>
+      <title>Environment Details</title>
+      <table>
+        <title>This table displays key environment details and configuration.</title>
+        <search base="baseSearchConcurrency">
+          <query>| table version numberOfVirtualCores physicalMemoryGB base_max_searches max_searches_per_cpu
+| rename numberOfVirtualCores as "Virtual CPUs", physicalMemoryGB as "Memory (GB)", version as "Splunk Version", base_max_searches as "Base Max Searches Constant", max_searches_per_cpu as "Max Searches per CPU"
+| transpose
+| rename column as Metric, "row 1" as Value</query>
+        </search>
+        <option name="count">11</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Current Search Concurrency Limits</title>
+      <table>
+        <title>This table displays common Search Concurrency Metrics.  See limits.conf for more details.</title>
+        <search base="baseSearchConcurrency">
+          <query>| table adhoc_search_perc max_searches_perc auto_summary_perc max_hist_searches max_hist_scheduled_searches max_auto_summary_searches
+| rename adhoc_search_perc as "Ad-Hoc Allocation %", auto_summary_perc as "Summary Allocation %", max_searches_perc as "Scheduled Allocation %", max_hist_searches as "Ad-hoc Search Limit", max_hist_scheduled_searches as "Scheduled Search Limit", max_auto_summary_searches as "Summarization Search Limit"
+| transpose
+| rename column as Metric, "row 1" as Value</query>
+        </search>
+        <option name="count">11</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row id="tab_performance">
+    <panel>
+      <title>Search Executions by Type</title>
+      <viz id="tableSearchCountByType" type="calendar_heatmap_app.calendar_heatmap">
+        <title>This table shows how many of the different type of searches have run.</title>
+        <search base="baseSearchSearchActivity">
+          <query>$tab_performance_token$
+| timechart span=1m count(eval(search_type="Data Model Acceleration")) as Summarized count(eval(search_type="Correlation Search" OR search_type="Dashboard Search" OR search_type="Other Scheduled Search")) as Scheduled count(eval(search_type="Ad-hoc Search")) as "Ad-hoc"</query>
+        </search>
+        <option name="calendar_heatmap_app.calendar_heatmap.cellPadding">2</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.cellSize">10</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.cellStyle">square</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.legendType">independent</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.maxColor">#20689c</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.minColor">#d1f4ff</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.numOfBins">9</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.showLegend">true</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.splitMonths">true</option>
+        <option name="drilldown">none</option>
+        <option name="height">574</option>
+        <option name="refresh.display">progressbar</option>
+      </viz>
+    </panel>
+    <panel>
+      <title>Search Limits Contention</title>
+      <viz id="tableSearchContention" type="calendar_heatmap_app.calendar_heatmap">
+        <title>This table shows when search limits have been reached, which causes contention (in dark blue).</title>
+        <search base="baseSearchSearchActivity">
+          <query>$tab_performance_token$
+| timechart span=1m count(eval(search_type="Data Model Acceleration")) as summarized count(eval(search_type="Correlation Search" OR search_type="Dashboard Search" OR search_type="Other Scheduled Search")) as scheduled count(eval(search_type="Ad-hoc Search")) as adhoc
+| appendcols [
+   | rest splunk_server=local /services/server/status/limits/search-concurrency 
+   | table max_auto_summary_searches, max_hist_scheduled_searches, max_hist_searches
+]
+| filldown max_auto_summary_searches, max_hist_scheduled_searches, max_hist_searches
+| timechart span=1m count(eval(summarized &gt; max_auto_summary_searches)) as "Summarized Search Contention" count(eval((summarized + scheduled) &gt; max_hist_scheduled_searches)) as "Scheduled Search Contention" count(eval(summarized + scheduled + adhoc &gt; max_hist_searches)) as "All Searches Contention"</query>
+        </search>
+        <option name="calendar_heatmap_app.calendar_heatmap.cellPadding">2</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.cellSize">10</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.cellStyle">square</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.legendType">independent</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.maxColor">#20689c</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.minColor">#d1f4ff</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.numOfBins">9</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.showLegend">true</option>
+        <option name="calendar_heatmap_app.calendar_heatmap.splitMonths">true</option>
+        <option name="drilldown">none</option>
+        <option name="height">574</option>
+        <option name="refresh.display">progressbar</option>
+      </viz>
+    </panel>
+  </row>
+  <row id="tab_performance_details_1">
+    <panel>
+      <title>Top 10 Data Model Acceleration Searches</title>
+      <table>
+        <search base="baseSearchSearchActivity">
+          <query>
+$tab_performance_token$
+| search search_type = "Data Model Acceleration"
+| stats count as "Number of run" 
+    avg(total_run_time) as "Avg run time" 
+    max(total_run_time) as "Max run time" 
+    sum(total_run_time) as "Cumulative Run"
+    by search_name 
+| sort - "Cumulative Run" 
+| eval "Cumulative minutes"=round( 'Cumulative Run'/60, 1 )
+| addtotals row=f col=t "Cumulative Run" labelfield=search_name label="Total"
+| streamstats count as rank
+| eventstats count as total_count
+| search rank &lt;= 10 OR search_name=Total
+| eval search_name = if ( search_name=="Total", "Total for " . ( total_count - 1 ) . " searches", search_name )
+| fields - rank total_count
+| eval "Cumulative Run"=tostring('Cumulative Run', "duration"), 
+    "Avg run time"=tostring(round('Avg run time'), "duration"), 
+    "Max run time"=tostring('Max run time', "duration")
+          </query>
+        </search>
+        <option name="count">11</option>
+        <option name="drilldown">none</option>
+        <format type="color" field="Cumulative minutes">
+          <colorPalette type="minMidMax" maxColor="#20689C" minColor="#D1F4FF"></colorPalette>
+          <scale type="minMidMax"></scale>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <title>Top 10 Correlation Searches</title>
+      <table>
+        <search base="baseSearchSearchActivity">
+          <query>
+$tab_performance_token$
+| search search_type="Correlation Search"
+| stats count as "Number of run" 
+    avg(total_run_time) as "Avg run time" 
+    max(total_run_time) as "Max run time" 
+    sum(total_run_time) as "Cumulative Run" 
+    by search_name 
+| sort - "Cumulative Run" 
+| eval "Cumulative minutes"=round( 'Cumulative Run'/60, 1 )
+| addtotals row=f col=t "Cumulative Run" labelfield=search_name label="Total"
+| streamstats count as rank
+| eventstats count as total_count
+| search rank &lt;= 10 OR search_name=Total
+| eval search_name = if ( search_name=="Total", "Total for " . ( total_count - 1 ) . " searches", search_name )
+| fields - rank total_count
+| eval "Cumulative Run"=tostring('Cumulative Run', "duration"), 
+    "Avg run time"=tostring(round('Avg run time'), "duration"), 
+    "Max run time"=tostring('Max run time', "duration")
+          </query>
+        </search>
+        <option name="count">11</option>
+        <option name="drilldown">none</option>
+        <format type="color" field="Cumulative minutes">
+          <colorPalette type="minMidMax" maxColor="#20689C" minColor="#D1F4FF"></colorPalette>
+          <scale type="minMidMax"></scale>
+        </format>
+      </table>
+    </panel>
+  </row>
+  <row id="tab_performance_details_2">
+    <panel>
+      <title>Top 10 Dashboard Searches</title>
+      <table>
+        <search base="baseSearchSearchActivity">
+          <query>
+$tab_performance_token$
+| search search_type="Dashboard Search"
+| stats count as "Number of run" 
+    avg(total_run_time) as "Avg run time" 
+    max(total_run_time) as "Max run time" 
+    sum(total_run_time) as "Cumulative Run" 
+    by search_name 
+| sort - "Cumulative Run" 
+| eval "Cumulative minutes"=round( 'Cumulative Run'/60, 1 )
+| addtotals row=f col=t "Cumulative Run" labelfield=search_name label="Total"
+| streamstats count as rank
+| eventstats count as total_count
+| search rank &lt;= 10 OR search_name=Total
+| eval search_name = if ( search_name=="Total", "Total for " . ( total_count - 1 ) . " searches", search_name )
+| fields - rank total_count
+| fieldformat "Cumulative Run"=tostring('Cumulative Run', "duration")
+| eval  
+    "Avg run time"=tostring(round('Avg run time'), "duration"), 
+    "Max run time"=tostring('Max run time', "duration")
+          </query>
+        </search>
+        <option name="count">11</option>
+        <option name="drilldown">none</option>
+        <format type="color" field="Cumulative minutes">
+          <colorPalette type="minMidMax" maxColor="#20689C" minColor="#D1F4FF"></colorPalette>
+          <scale type="minMidMax"></scale>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <title>Top 10 Other Scheduled Searches</title>
+      <table>
+        <search base="baseSearchSearchActivity">
+          <query>
+$tab_performance_token$
+| search search_type="Other Scheduled Search"
+| stats count as "Number of run" 
+    avg(total_run_time) as "Avg run time" 
+    max(total_run_time) as "Max run time" 
+    sum(total_run_time) as "Cumulative Run" 
+    by search_name 
+| sort - "Cumulative Run" 
+| eval "Cumulative minutes"=round( 'Cumulative Run'/60, 1 )
+| addtotals row=f col=t "Cumulative Run" labelfield=search_name label="Total"
+| streamstats count as rank
+| eventstats count as total_count
+| search rank &lt;= 10 OR search_name=Total
+| eval search_name = if ( search_name=="Total", "Total for " . ( total_count - 1 ) . " searches", search_name )
+| fields - rank total_count
+| eval "Cumulative Run"=tostring('Cumulative Run', "duration"), 
+    "Avg run time"=tostring(round('Avg run time'), "duration"), 
+    "Max run time"=tostring('Max run time', "duration")
+          </query>
+        </search>
+        <option name="count">11</option>
+        <option name="drilldown">none</option>
+        <format type="color" field="Cumulative minutes">
+          <colorPalette type="minMidMax" maxColor="#20689C" minColor="#D1F4FF"></colorPalette>
+          <scale type="minMidMax"></scale>
+        </format>
+      </table>
     </panel>
   </row>
 </form>

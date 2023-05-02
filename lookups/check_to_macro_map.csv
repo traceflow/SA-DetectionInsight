@@ -1,5 +1,6 @@
 check_name,details_search_macro,details_search_label
 "Detection has a Contributing Event Search",get_contributing_search_details,"Has Search?"
+"Detection has Next Steps Defined",get_next_steps_details,"Has Next Steps?"
 "Detection generates Notable Events",get_notable_details,"Generates Notable Event?"
 "Detection generates Risk",get_risk_details,"Contributes Risk?"
 "Detection uses Threat Intelligence Management Action",get_tim_details,"Uses Threat Intealligence Management?"
