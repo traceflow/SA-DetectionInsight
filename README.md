@@ -27,14 +27,17 @@ A supporting Add-on for Splunk Enterprise Security providing additional insights
 
 It's a Splunk supporting add-on (SA) built for Splunk Enterprise Security (ES) that provides an additional view that aims to help users answer the following questions (amongst others):
 
-- Which security detections in my environment have drilldowns or not?
-- Which ones generate notables/risk/other actions?
+- Which security detections in my environment have drilldowns or not?  Next Steps defined?
+- Which ones generate notables/risk/soar/other actions?
 - Which ones are mapped to `<insert security framework here>` or not?
 - Which ones trigger and what is the trend?
+- Are any using Machine Learning Models?
+- Are there configuration issues with any of my detections?
 - How are my searches/alerts/correlation searches scheduled?  Are there bottlenecks or other issues?
 - How can I see changes made to my detections (enabled/disabled/modified)?
-- How does my current detection posture maps to MITRE?  What about triggered detections?  How did my posture evolve vs. MITRE over time? etc.
+- How does my current detections posture maps to MITRE?  What about triggered detections?  What about other products I might have mapped to MITRE? How did my posture evolve vs. MITRE over time? etc.
 - What commands are used in my detections?  Are any using commands known to be slower/have limits? 
+- What is the performance of my detections/saved searches/data model accelerations? How does that compare to current search concurrency limits?
 - etc.
 
 It's meant to be integrated into your ES installation's navigation.  See details below.
