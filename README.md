@@ -198,7 +198,7 @@ The **Detection Details** tab provides more information on selected Security Det
 - Their related security domain
 - The main SPL Command used for the underlying search
 - If the detection uses Machine Learning or not
-- The adaptive actions used
+- The risk score assigned, when relevant
 - The MITRE ATT&CK Technique(s) covered
 - Any potential issues
 
