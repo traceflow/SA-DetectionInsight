@@ -114,7 +114,7 @@ You can confirm that the lookup is properly populated separately by running the 
 
 If that returns events, it's correctly setup.
 
-In case you would prefer to have real-time data instead of relying on a lookup (at the cosst of a performance hit), you can change the base search in the provided dashboard from:
+In case you would prefer to have real-time data instead of relying on a lookup (at the cost of a performance hit), you can change the base search in the provided dashboard from:
 
 ![Base Search Default](readme/BaseSearchDefault.png)
 
